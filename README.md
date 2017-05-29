@@ -48,5 +48,5 @@ and is intended to be used at the front-end of a cluster of
   to the standard Minecraft server port of 25565 using:
 
   ```
-  -p 25565:2557
+  -p 25565:25577
   ```
