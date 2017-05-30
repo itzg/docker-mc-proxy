@@ -13,4 +13,18 @@ fi
 echo "Setting initial memory to ${INIT_MEMORY:-${MEMORY}} and max to ${MAX_MEMORY:-${MEMORY}}"
 JVM_OPTS="-Xms${INIT_MEMORY:-${MEMORY}} -Xmx${MAX_MEMORY:-${MEMORY}} ${JVM_OPTS}"
 
-exec java $JVM_OPTS -jar $BUNGEE_JAR "$@"
+userAddArgs=
+if [[ -n $UID ]]; then
+  userAddArgs="$userAddArgs --uid $UID"
+fi
+if [[ -n $GID ]]; then
+  userAddArgs="$userAddArgs --gid $GID"
+fi
+
+if [[ -n $UID ]]; then
+  useradd --home-dir=$BUNGEE_HOME --no-create-home $userAddArgs bungeecord
+  chown -R bungeecord: $BUNGEE_HOME
+  runuser -u bungeecord /usr/bin/java -- $JVM_OPTS -jar $BUNGEE_JAR "$@"
+else
+  exec java $JVM_OPTS -jar $BUNGEE_JAR "$@"
+fi

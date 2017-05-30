@@ -58,4 +58,4 @@ and is intended to be used at the front-end of a cluster of
 This image may be run as a non-root user but does require an attached `/server`
 volume that is writable by that uid, such as:
 
-    docker run ... --user $UID -v $(pwd)/data:/server itzg/bungeecord
+    docker run ... -e UID=$uid -e GID=$gid -v $(pwd)/data:/server itzg/bungeecord
