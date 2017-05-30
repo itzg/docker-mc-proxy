@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BUNGEE_JAR=/usr/lib/BungeeCord.jar
+BUNGEE_JAR=$BUNGEE_HOME/BungeeCord.jar
 
 if [[ ! -e $BUNGEE_JAR ]]; then
   echo "Downloading ${BUNGEE_JAR_URL:=${BUNGEE_BASE_URL}/${BUNGEE_JOB_ID:-lastStableBuild}/artifact/bootstrap/target/BungeeCord.jar}"
