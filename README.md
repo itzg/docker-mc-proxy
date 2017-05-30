@@ -21,11 +21,11 @@ and is intended to be used at the front-end of a cluster of
 
   The Java memory heap size to specify to the JVM.
 
-* **INIT_MEMORY**
+* **INIT_MEMORY**=${MEMORY}
 
   Can be set to use a different initial heap size.
 
-* **MAX_MEMORY**
+* **MAX_MEMORY**=${MEMORY}
 
   Can be set to use a different max heap size.
 
@@ -50,3 +50,12 @@ and is intended to be used at the front-end of a cluster of
   ```
   -p 25565:25577
   ```
+
+## Scenarios
+
+### Running non-root
+
+This image may be run as a non-root user but does require an attached `/server`
+volume that is writable by that uid, such as:
+
+    docker run ... --user $UID -v $(pwd)/data:/server itzg/bungeecord
