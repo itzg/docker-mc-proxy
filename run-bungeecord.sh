@@ -19,6 +19,7 @@ if [[ -n $UID ]]; then
 fi
 if [[ -n $GID ]]; then
   userAddArgs="$userAddArgs --gid $GID"
+  groupadd --gid $GID bungeecord
 fi
 
 if [[ -n $UID ]]; then
