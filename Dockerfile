@@ -1,6 +1,6 @@
 FROM java:8-jre
 
-VOLUME ["/server"]
+VOLUME ["/server", "/plugins"]
 WORKDIR /server
 
 COPY *.sh /usr/bin/
