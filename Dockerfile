@@ -1,4 +1,4 @@
-FROM java:8-jre
+FROM openjdk:8u131-jre-alpine
 
 VOLUME ["/server", "/plugins"]
 WORKDIR /server
