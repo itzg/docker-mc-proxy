@@ -1,6 +1,6 @@
-FROM java:8-jre
+FROM openjdk:8u131-jre-alpine
 
-VOLUME ["/server"]
+VOLUME ["/server", "/plugins"]
 WORKDIR /server
 
 COPY *.sh /usr/bin/

@@ -10,6 +10,11 @@ if [[ ! -e $BUNGEE_JAR ]]; then
   fi
 fi
 
+if [ -d /plugins ]; then
+  echo "Copying BungeeCord plugins over..."
+  cp -r /plugins $BUNGEE_HOME
+fi
+  
 echo "Setting initial memory to ${INIT_MEMORY:-${MEMORY}} and max to ${MAX_MEMORY:-${MEMORY}}"
 JVM_OPTS="-Xms${INIT_MEMORY:-${MEMORY}} -Xmx${MAX_MEMORY:-${MEMORY}} ${JVM_OPTS}"
 

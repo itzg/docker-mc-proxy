@@ -39,6 +39,10 @@ and is intended to be used at the front-end of a cluster of
 
   The working directory where BungeeCord is started. This is the directory
   where its `config.yml` will be loaded.
+  
+* **/plugins**
+
+  Plugins will be copied across from this directory before the server is started.
 
 ## Ports
 
