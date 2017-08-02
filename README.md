@@ -2,6 +2,9 @@ This is a Docker image of [BungeeCord](https://www.spigotmc.org/wiki/bungeecord/
 and is intended to be used at the front-end of a cluster of
 [itzg/minecraft-server](https://hub.docker.com/r/itzg/minecraft-server/) containers.
 
+[![Docker Automated buil](https://img.shields.io/docker/automated/itzg/bungeecord.svg)](https://hub.docker.com/r/itzg/bungeecord/)
+
+
 ## Environment Settings
 
 * **BUNGEE_JOB_ID**=lastStableBuild
