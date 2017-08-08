@@ -11,15 +11,13 @@ ENV BUNGEE_HOME=/server \
 
 COPY *.sh /usr/bin/
 
-RUN apk --no-cache add curl
-RUN apk --no-cache add bash
+RUN apk --no-cache add curl bash sudo
 
 EXPOSE 25577
 
 RUN set -x \
 	&& addgroup -g 1000 -S bungeecord \
-	&& adduser -u 1000 -D -S -G bungeecord bungeecord
+	&& adduser -u 1000 -D -S -G bungeecord bungeecord \
+	&& addgroup bungeecord wheel
 
-USER bungeecord
-
-ENTRYPOINT ["/usr/bin/run-bungeecord.sh"]
+CMD ["/usr/bin/run-bungeecord.sh"]

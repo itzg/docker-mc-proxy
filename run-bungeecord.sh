@@ -15,7 +15,9 @@ if [ -d /plugins ]; then
     cp -r /plugins $BUNGEE_HOME
 fi
   
+chown -R bungeecord:bungeecord $BUNGEE_HOME
+
 echo "Setting initial memory to ${INIT_MEMORY:-${MEMORY}} and max to ${MAX_MEMORY:-${MEMORY}}"
 JVM_OPTS="-Xms${INIT_MEMORY:-${MEMORY}} -Xmx${MAX_MEMORY:-${MEMORY}} ${JVM_OPTS}"
 
-exec java $JVM_OPTS -jar $BUNGEE_JAR "$@"
+exec sudo -u bungeecord java $JVM_OPTS -jar $BUNGEE_JAR "$@"
