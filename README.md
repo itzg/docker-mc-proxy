@@ -58,6 +58,10 @@ and is intended to be used at the front-end of a cluster of
   -p 25565:25577
   ```
 
+## BungeeCord Configuration
+
+[BungeeCord Configuration Guide](https://www.spigotmc.org/wiki/bungeecord-configuration-guide/)
+
 ## Scenarios
 
 ### Running non-root

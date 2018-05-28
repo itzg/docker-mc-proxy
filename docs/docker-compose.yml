@@ -1,0 +1,14 @@
+version: '3.5'
+
+services:
+  mc:
+    image: itzg/minecraft-server
+    environment:
+      EULA: "TRUE"
+      ONLINE_MODE: "FALSE"
+  bungeecord:
+    image: itzg/bungeecord
+    ports:
+      - 25577:25577
+    volumes:
+      - ./config.yml:/server/config.yml
