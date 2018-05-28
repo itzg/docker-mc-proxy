@@ -4,6 +4,16 @@ and is intended to be used at the front-end of a cluster of
 
 [![Docker Automated buil](https://img.shields.io/docker/automated/itzg/bungeecord.svg)](https://hub.docker.com/r/itzg/bungeecord/)
 
+## Using with itzg/minecraft-server image
+
+When using with the server image [itzg/minecraft-server](https://hub.docker.com/r/itzg/minecraft-server/)
+you can disable online mode, which is required by bungeecord, by setting `ONLINE_MODE=FALSE`, such as
+
+```bash
+docker run ... -e ONLINE_MODE=FALSE itzg/minecraft-server
+```
+
+[Here](docs/docker-compose.yml) is an example Docker Compose file.
 
 ## Environment Settings
 
