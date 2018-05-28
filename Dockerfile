@@ -5,9 +5,7 @@ WORKDIR /server
 
 ENV BUNGEE_HOME=/server \
     BUNGEE_BASE_URL=https://ci.md-5.net/job/BungeeCord \
-    MEMORY=512m \
-    UID=1000 \
-    GID=1000
+    MEMORY=512m
 
 COPY *.sh /usr/bin/
 
