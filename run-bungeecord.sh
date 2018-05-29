@@ -15,6 +15,14 @@ if [ -d /plugins ]; then
     cp -r /plugins $BUNGEE_HOME
 fi
 
+if [ -f /var/run/default-config.yml -a ! -f /server/config.yml ]; then
+    echo "Installing default configuration"
+    cp /var/run/default-config.yml /server/config.yml
+    if [ $UID == 0 ]; then
+        chown bungeecord: /server/config.yml
+    fi
+fi
+
 if [ $UID == 0 ]; then
   chown -R bungeecord:bungeecord $BUNGEE_HOME
 fi
