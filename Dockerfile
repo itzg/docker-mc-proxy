@@ -5,6 +5,7 @@ WORKDIR /server
 
 ENV BUNGEE_HOME=/server \
     BUNGEE_BASE_URL=https://ci.md-5.net/job/BungeeCord \
+    BUNGEE_JAR_URL=https://8-135221131-gh.circle-artifacts.com/0/BungeeCord.jar \
     MEMORY=512m
 
 COPY *.sh /usr/bin/
