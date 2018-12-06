@@ -57,6 +57,11 @@ docker run ... -e ONLINE_MODE=FALSE itzg/minecraft-server
 
   Plugins will be copied across from this directory before the server is started.
 
+* **/config**
+  
+  Configs will be copied accros from this directory before the server is started.
+  Will **not** overwrite existing configs in the mounted `/server` volume.
+
 ## Ports
 
 * **25577**

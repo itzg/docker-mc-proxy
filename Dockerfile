@@ -1,6 +1,6 @@
 FROM openjdk:8u131-jre-alpine
 
-VOLUME ["/server", "/plugins"]
+VOLUME ["/server", "/plugins", "/config"]
 WORKDIR /server
 
 ENV BUNGEE_HOME=/server \
