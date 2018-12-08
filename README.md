@@ -59,8 +59,7 @@ docker run ... -e ONLINE_MODE=FALSE itzg/minecraft-server
 
 * **/config**
   
-  Configs will be copied accros from this directory before the server is started.
-  Will **not** overwrite existing configs in the mounted `/server` volume.
+  The `/config/config.yml` file in this volume will be copied accross on startup if it is newer than the config in `/server/config.yml`.
 
 ## Ports
 

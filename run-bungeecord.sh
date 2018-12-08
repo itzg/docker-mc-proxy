@@ -17,7 +17,7 @@ fi
 
 if [ -d /config ]; then
     echo "Copying BungeeCord configs over..."
-    cp -n /config/* $BUNGEE_HOME
+    cp -u /config/config.yml "$BUNGEE_HOME/config.yml"
 fi
 
 if [ $UID == 0 ]; then
