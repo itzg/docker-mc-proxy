@@ -15,6 +15,11 @@ if [ -d /plugins ]; then
     cp -r /plugins $BUNGEE_HOME
 fi
 
+if [ -d /config ]; then
+    echo "Copying BungeeCord configs over..."
+    cp -u /config/config.yml "$BUNGEE_HOME/config.yml"
+fi
+
 if [ $UID == 0 ]; then
   chown -R bungeecord:bungeecord $BUNGEE_HOME
 fi
