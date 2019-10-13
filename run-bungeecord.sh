@@ -15,6 +15,31 @@ if [ -d /plugins ]; then
     cp -r /plugins $BUNGEE_HOME
 fi
 
+# If supplied with a URL for a plugin download it.
+if [[ "$PLUGINS" ]]; then
+for i in ${PLUGINS//,/ }
+do
+  EFFECTIVE_PLUGIN_URL=$(curl -Ls -o /dev/null -w %{url_effective} $i)
+  case "X$EFFECTIVE_PLUGIN_URL" in
+    X[Hh][Tt][Tt][Pp]*.jar)
+      echo "Downloading plugin via HTTP"
+      echo "  from $EFFECTIVE_PLUGIN_URL ..."
+      if ! curl -sSL -o /tmp/${EFFECTIVE_PLUGIN_URL##*/} $EFFECTIVE_PLUGIN_URL; then
+        echo "ERROR: failed to download from $EFFECTIVE_PLUGIN_URL to /tmp/${EFFECTIVE_PLUGIN_URL##*/}"
+        exit 2
+      fi
+
+      mkdir -p /server/plugins
+      mv /tmp/${EFFECTIVE_PLUGIN_URL##*/} /server/plugins/${EFFECTIVE_PLUGIN_URL##*/}
+      rm -f /tmp/${EFFECTIVE_PLUGIN_URL##*/}
+      ;;
+    *)
+      echo "Invalid URL given for plugin list: Must be HTTP or HTTPS and a JAR file"
+      ;;
+  esac
+done
+fi
+
 if [ -d /config ]; then
     echo "Copying BungeeCord configs over..."
     cp -u /config/config.yml "$BUNGEE_HOME/config.yml"
