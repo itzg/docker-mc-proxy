@@ -45,7 +45,15 @@ docker run ... -e ONLINE_MODE=FALSE itzg/minecraft-server
 * **JVM_OPTS**
 
   Additional -X options to pass to the JVM.
+ 
+* **PLUGINS**
 
+  Used to download a comma seperated list of *.jar urls to the plugins folder.
+  
+  ```
+  -e PLUGINS=https://www.example.com/plugin1.jar,https://www.example.com/plugin2.jar
+  ```
+  
 ## Volumes
 
 * **/server**
