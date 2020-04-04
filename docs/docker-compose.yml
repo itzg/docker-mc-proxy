@@ -8,7 +8,9 @@ services:
       ONLINE_MODE: "FALSE"
   bungeecord:
     image: itzg/bungeecord
+    environment:
+      BUNGEE_JAR_REVISION: "1"
     ports:
-      - 25577:25577
+      - 25565:25577
     volumes:
       - ./config.yml:/server/config.yml

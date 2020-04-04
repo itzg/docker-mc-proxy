@@ -1,9 +1,16 @@
 #!/bin/bash
 
-BUNGEE_JAR=$BUNGEE_HOME/BungeeCord.jar
+: ${BUNGEE_HOME:=/server}
+: ${BUNGEE_BASE_URL:=https://ci.md-5.net/job/BungeeCord}
+: ${MEMORY:=512m}
+: ${BUNGEE_JOB_ID:=lastStableBuild}
+: ${BUNGEE_JAR_URL:=${BUNGEE_BASE_URL}/${BUNGEE_JOB_ID}/artifact/bootstrap/target/BungeeCord.jar}
+: ${BUNGEE_JAR_REVISION:=${BUNGEE_JOB_ID}}
+
+BUNGEE_JAR=$BUNGEE_HOME/BungeeCord-${BUNGEE_JAR_REVISION}.jar
 
 if [[ ! -e $BUNGEE_JAR ]]; then
-    echo "Downloading ${BUNGEE_JAR_URL:=${BUNGEE_BASE_URL}/${BUNGEE_JOB_ID:-lastStableBuild}/artifact/bootstrap/target/BungeeCord.jar}"
+    echo "Downloading ${BUNGEE_JAR_URL}"
     if ! curl -o $BUNGEE_JAR -fsSL $BUNGEE_JAR_URL; then
         echo "ERROR: failed to download" >&2
         exit 2

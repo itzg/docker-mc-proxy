@@ -1,6 +1,3 @@
-groups:
-  md_5:
-  - admin
 ip_forward: false
 forge_support: false
 network_compression_threshold: 256
@@ -14,7 +11,9 @@ permissions:
   - bungeecord.command.end
   - bungeecord.command.ip
   - bungeecord.command.reload
-online_mode: true
+groups:
+  md_5:
+  - admin
 servers:
   lobby:
     address: mc:25565
@@ -39,7 +38,8 @@ listeners:
   proxy_protocol: false
 prevent_proxy_connections: false
 player_limit: -1
+online_mode: true
+log_commands: false
 disabled_commands:
 - disabledcommandhere
-log_commands: false
 connection_throttle: 4000

@@ -17,19 +17,6 @@ docker run ... -e ONLINE_MODE=FALSE itzg/minecraft-server
 
 ## Environment Settings
 
-* **BUNGEE_JOB_ID**=lastStableBuild
-
-  The Jenkins job ID of the artifact to download and run and is used when
-  deriving the default value of `BUNGEE_JAR_URL`
-
-* **BUNGEE_BASE_URL**=https://ci.md-5.net/job/BungeeCord
-
-  Used to derive the default value of `BUNGEE_JAR_URL`
-
-* **BUNGEE_JAR_URL**=${BUNGEE_BASE_URL}/${BUNGEE_JOB_ID}/artifact/bootstrap/target/BungeeCord.jar
-
-  If set, can specify a custom, fully qualified URL  of the BungeeCord.jar
-
 * **MEMORY**=512m
 
   The Java memory heap size to specify to the JVM.
@@ -54,6 +41,24 @@ docker run ... -e ONLINE_MODE=FALSE itzg/minecraft-server
   -e PLUGINS=https://www.example.com/plugin1.jar,https://www.example.com/plugin2.jar
   ```
   
+## Optional Environment Settings
+
+* **BUNGEE_JOB_ID**=lastStableBuild
+
+  The Jenkins job ID of the artifact to download and run and is used when deriving the default value of `BUNGEE_JAR_URL`
+
+* **BUNGEE_JAR_REVISION**
+
+  Defaults to the value of `${BUNGEE_JOB_ID}`, but can be set to an arbitrarily incremented value to force an upgrade of the downloaded BungeeCord jar file.
+
+* **BUNGEE_BASE_URL**=https://ci.md-5.net/job/BungeeCord
+
+  Used to derive the default value of `BUNGEE_JAR_URL`
+
+* **BUNGEE_JAR_URL**
+
+  If set, can specify a custom, fully qualified URL  of the BungeeCord.jar; however, you won't be able reference the other environment variables from within a `docker run` a compose file. Defaults to `${BUNGEE_BASE_URL}/${BUNGEE_JOB_ID}/artifact/bootstrap/target/BungeeCord.jar`
+
 ## Volumes
 
 * **/server**
