@@ -17,6 +17,12 @@ docker run ... -e ONLINE_MODE=FALSE itzg/minecraft-server
 
 ## Environment Settings
 
+* **TYPE**=BUNGEECORD
+
+  The type of the server. When the type is set to `CUSTOM`, the environment setting `BUNGEE_JAR_URL` is required.
+
+  Possible values: `BUNGEECORD`, `WATERFALL`, `CUSTOM`
+
 * **MEMORY**=512m
 
   The Java memory heap size to specify to the JVM.
@@ -32,15 +38,15 @@ docker run ... -e ONLINE_MODE=FALSE itzg/minecraft-server
 * **JVM_OPTS**
 
   Additional -X options to pass to the JVM.
- 
+
 * **PLUGINS**
 
   Used to download a comma seperated list of *.jar urls to the plugins folder.
-  
+
   ```
   -e PLUGINS=https://www.example.com/plugin1.jar,https://www.example.com/plugin2.jar
   ```
-  
+
 ## Optional Environment Settings
 
 * **BUNGEE_JOB_ID**=lastStableBuild
@@ -51,13 +57,21 @@ docker run ... -e ONLINE_MODE=FALSE itzg/minecraft-server
 
   Defaults to the value of `${BUNGEE_JOB_ID}`, but can be set to an arbitrarily incremented value to force an upgrade of the downloaded BungeeCord jar file.
 
-* **BUNGEE_BASE_URL**=https://ci.md-5.net/job/BungeeCord
+* **BUNGEE_BASE_URL**
+
+  Default to:
+
+  * (type `BUNGEECORD`): <https://ci.md-5.net/job/BungeeCord>
+  * (type `WATERFALL`): <https://papermc.io/ci/job/Waterfall/>
 
   Used to derive the default value of `BUNGEE_JAR_URL`
 
 * **BUNGEE_JAR_URL**
 
-  If set, can specify a custom, fully qualified URL  of the BungeeCord.jar; however, you won't be able reference the other environment variables from within a `docker run` a compose file. Defaults to `${BUNGEE_BASE_URL}/${BUNGEE_JOB_ID}/artifact/bootstrap/target/BungeeCord.jar`
+  If set, can specify a custom, fully qualified URL  of the BungeeCord.jar; however, you won't be able reference the other environment variables from within a `docker run` a compose file. Defaults to:
+
+  * (type: `BUNGEECORD`): `${BUNGEE_BASE_URL}/${BUNGEE_JOB_ID}/artifact/bootstrap/target/BungeeCord.jar`
+  * (type: `WATERFALL`): `${BUNGEE_BASE_URL}/${BUNGEE_JOB_ID}/artifact/Waterfall-Proxy/bootstrap/target/Waterfall.jar`
 
 ## Volumes
 
@@ -65,13 +79,13 @@ docker run ... -e ONLINE_MODE=FALSE itzg/minecraft-server
 
   The working directory where BungeeCord is started. This is the directory
   where its `config.yml` will be loaded.
-  
+
 * **/plugins**
 
   Plugins will be copied across from this directory before the server is started.
 
 * **/config**
-  
+
   The `/config/config.yml` file in this volume will be copied accross on startup if it is newer than the config in `/server/config.yml`.
 
 ## Ports

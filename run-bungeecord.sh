@@ -1,13 +1,55 @@
 #!/bin/bash
 
+: ${TYPE:=BUNGEECORD}
 : ${BUNGEE_HOME:=/server}
-: ${BUNGEE_BASE_URL:=https://ci.md-5.net/job/BungeeCord}
 : ${MEMORY:=512m}
-: ${BUNGEE_JOB_ID:=lastStableBuild}
-: ${BUNGEE_JAR_URL:=${BUNGEE_BASE_URL}/${BUNGEE_JOB_ID}/artifact/bootstrap/target/BungeeCord.jar}
-: ${BUNGEE_JAR_REVISION:=${BUNGEE_JOB_ID}}
 
-BUNGEE_JAR=$BUNGEE_HOME/BungeeCord-${BUNGEE_JAR_REVISION}.jar
+function isURL {
+  local value=$1
+
+  if [[ ${value:0:8} == "https://" || ${value:0:7} == "http://" ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+echo "Resolving type given ${TYPE}"
+case "${TYPE^^}" in
+  BUNGEECORD)
+    : ${BUNGEE_BASE_URL:=https://ci.md-5.net/job/BungeeCord}
+    : ${BUNGEE_JOB_ID:=lastStableBuild}
+    : ${BUNGEE_JAR_URL:=${BUNGEE_BASE_URL}/${BUNGEE_JOB_ID}/artifact/bootstrap/target/BungeeCord.jar}
+    : ${BUNGEE_JAR_REVISION:=${BUNGEE_JOB_ID}}
+    BUNGEE_JAR=$BUNGEE_HOME/${BUNGEE_JAR:=BungeeCord-${BUNGEE_JAR_REVISION}.jar}
+  ;;
+
+  WATERFALL)
+    : ${BUNGEE_BASE_URL:=https://papermc.io/ci/job/Waterfall/}
+    : ${BUNGEE_JOB_ID:=lastStableBuild}
+    : ${BUNGEE_JAR_URL:=${BUNGEE_BASE_URL}/${BUNGEE_JOB_ID}/artifact/Waterfall-Proxy/bootstrap/target/Waterfall.jar}
+    : ${BUNGEE_JAR_REVISION:=${BUNGEE_JOB_ID}}
+    BUNGEE_JAR=$BUNGEE_HOME/${BUNGEE_JAR:=Waterfall-${BUNGEE_JAR_REVISION}.jar}
+  ;;
+
+  CUSTOM)
+    if isURL ${BUNGEE_JAR_URL}; then
+      BUNGEE_JAR=$BUNGEE_HOME/$(basename ${BUNGEE_JAR_URL})
+    elif [[ -f ${BUNGEE_JAR_URL} ]]; then
+      echo "Using custom server jar at ${BUNGEE_JAR_URL} ..."
+      BUNGEE_JAR=${BUNGEE_JAR_URL}
+    else
+      echo "BUNGEE_JAR_URL is not properly set to a URL or existing jar file"
+      exit 2
+    fi
+  ;;
+
+  *)
+      echo "Invalid type: '$TYPE'"
+      echo "Must be: BUNGEECORD, WATERFALL, CUSTOM"
+      exit 1
+  ;;
+esac
 
 if [[ ! -e $BUNGEE_JAR ]]; then
     echo "Downloading ${BUNGEE_JAR_URL}"
