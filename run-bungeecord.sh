@@ -60,6 +60,24 @@ if [ -f /var/run/default-config.yml -a ! -f /server/config.yml ]; then
     fi
 fi
 
+# Replace environment variables in config files
+if [ "${REPLACE_ENV_VARIABLES^^}" = "TRUE" ]; then
+  echo "Replacing env variables in configs that match the prefix $ENV_VARIABLE_PREFIX..."
+  while IFS='=' read -r name value ; do
+    # check if name of env variable matches the prefix
+    # sanity check environment variables to avoid code injections
+    if [[ "$name" = $ENV_VARIABLE_PREFIX* ]] \
+        && [[ $value =~ ^[0-9a-zA-Z_:/=?.+\-]*$ ]] \
+        && [[ $name =~ ^[0-9a-zA-Z_\-]*$ ]]; then
+      echo "Replacing $name with $value ..."
+      find $BUNGEE_HOME -type f \
+          \( -name "*.yml" -or -name "*.yaml" -or -name "*.txt" -or -name "*.cfg" \
+          -or -name "*.conf" -or -name "*.properties" \) \
+          -exec sed -i 's#${'"$name"'}#'"$value"'#g' {} \;
+    fi
+  done < <(env)
+fi
+
 if [ $UID == 0 ]; then
   chown -R bungeecord:bungeecord $BUNGEE_HOME
 fi
