@@ -1,8 +1,8 @@
 #!/bin/bash
 
 : ${TYPE:=BUNGEECORD}
-: ${BUNGEE_HOME:=/server}
 : ${MEMORY:=512m}
+BUNGEE_HOME=/server
 
 function isURL {
   local value=$1
@@ -78,8 +78,8 @@ do
         exit 2
       fi
 
-      mkdir -p /server/plugins
-      mv /tmp/${EFFECTIVE_PLUGIN_URL##*/} /server/plugins/${EFFECTIVE_PLUGIN_URL##*/}
+      mkdir -p $BUNGEE_HOME/plugins
+      mv /tmp/${EFFECTIVE_PLUGIN_URL##*/} "$BUNGEE_HOME/plugins/${EFFECTIVE_PLUGIN_URL##*/}"
       rm -f /tmp/${EFFECTIVE_PLUGIN_URL##*/}
       ;;
     *)
@@ -94,12 +94,30 @@ if [ -d /config ]; then
     cp -u /config/config.yml "$BUNGEE_HOME/config.yml"
 fi
 
-if [ -f /var/run/default-config.yml -a ! -f /server/config.yml ]; then
+if [ -f /var/run/default-config.yml -a ! -f $BUNGEE_HOME/config.yml ]; then
     echo "Installing default configuration"
-    cp /var/run/default-config.yml /server/config.yml
+    cp /var/run/default-config.yml $BUNGEE_HOME/config.yml
     if [ $UID == 0 ]; then
-        chown bungeecord: /server/config.yml
+        chown bungeecord: $BUNGEE_HOME/config.yml
     fi
+fi
+
+# Replace environment variables in config files
+if [ "${REPLACE_ENV_VARIABLES^^}" = "TRUE" ]; then
+  echo "Replacing env variables in configs that match the prefix $ENV_VARIABLE_PREFIX..."
+  while IFS='=' read -r name value ; do
+    # check if name of env variable matches the prefix
+    # sanity check environment variables to avoid code injections
+    if [[ "$name" = $ENV_VARIABLE_PREFIX* ]] \
+        && [[ $value =~ ^[0-9a-zA-Z_:/=?.+\-]*$ ]] \
+        && [[ $name =~ ^[0-9a-zA-Z_\-]*$ ]]; then
+      echo "Replacing $name with $value ..."
+      find $BUNGEE_HOME -type f \
+          \( -name "*.yml" -or -name "*.yaml" -or -name "*.txt" -or -name "*.cfg" \
+          -or -name "*.conf" -or -name "*.properties" \) \
+          -exec sed -i 's#${'"$name"'}#'"$value"'#g' {} \;
+    fi
+  done < <(env)
 fi
 
 if [ $UID == 0 ]; then
