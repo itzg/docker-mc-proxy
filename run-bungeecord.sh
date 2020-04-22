@@ -1,12 +1,12 @@
 #!/bin/bash
 
-: ${BUNGEE_HOME:=/server}
 : ${BUNGEE_BASE_URL:=https://ci.md-5.net/job/BungeeCord}
 : ${MEMORY:=512m}
 : ${BUNGEE_JOB_ID:=lastStableBuild}
 : ${BUNGEE_JAR_URL:=${BUNGEE_BASE_URL}/${BUNGEE_JOB_ID}/artifact/bootstrap/target/BungeeCord.jar}
 : ${BUNGEE_JAR_REVISION:=${BUNGEE_JOB_ID}}
 
+BUNGEE_HOME=/server
 BUNGEE_JAR=$BUNGEE_HOME/BungeeCord-${BUNGEE_JAR_REVISION}.jar
 
 if [[ ! -e $BUNGEE_JAR ]]; then
@@ -36,8 +36,8 @@ do
         exit 2
       fi
 
-      mkdir -p /server/plugins
-      mv /tmp/${EFFECTIVE_PLUGIN_URL##*/} /server/plugins/${EFFECTIVE_PLUGIN_URL##*/}
+      mkdir -p $BUNGEE_HOME/plugins
+      mv /tmp/${EFFECTIVE_PLUGIN_URL##*/} "$BUNGEE_HOME/plugins/${EFFECTIVE_PLUGIN_URL##*/}"
       rm -f /tmp/${EFFECTIVE_PLUGIN_URL##*/}
       ;;
     *)
@@ -52,11 +52,11 @@ if [ -d /config ]; then
     cp -u /config/config.yml "$BUNGEE_HOME/config.yml"
 fi
 
-if [ -f /var/run/default-config.yml -a ! -f /server/config.yml ]; then
+if [ -f /var/run/default-config.yml -a ! -f $BUNGEE_HOME/config.yml ]; then
     echo "Installing default configuration"
-    cp /var/run/default-config.yml /server/config.yml
+    cp /var/run/default-config.yml /config.yml
     if [ $UID == 0 ]; then
-        chown bungeecord: /server/config.yml
+        chown bungeecord: $BUNGEE_HOME/config.yml
     fi
 fi
 
