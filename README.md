@@ -17,6 +17,12 @@ docker run ... -e ONLINE_MODE=FALSE itzg/minecraft-server
 
 ## Environment Settings
 
+* **TYPE**=BUNGEECORD
+
+  The type of the server. When the type is set to `CUSTOM`, the environment setting `BUNGEE_JAR_URL` is required.
+
+  Possible values: `BUNGEECORD`, `WATERFALL`, `CUSTOM`
+
 * **MEMORY**=512m
 
   The Java memory heap size to specify to the JVM.
@@ -51,13 +57,21 @@ docker run ... -e ONLINE_MODE=FALSE itzg/minecraft-server
 
   Defaults to the value of `${BUNGEE_JOB_ID}`, but can be set to an arbitrarily incremented value to force an upgrade of the downloaded BungeeCord jar file.
 
-* **BUNGEE_BASE_URL**=<https://ci.md-5.net/job/BungeeCord>
+* **BUNGEE_BASE_URL**
+
+  Default to:
+
+  * (type `BUNGEECORD`): <https://ci.md-5.net/job/BungeeCord>
+  * (type `WATERFALL`): <https://papermc.io/ci/job/Waterfall/>
 
   Used to derive the default value of `BUNGEE_JAR_URL`
 
 * **BUNGEE_JAR_URL**
 
-  If set, can specify a custom, fully qualified URL  of the BungeeCord.jar; however, you won't be able reference the other environment variables from within a `docker run` a compose file. Defaults to `${BUNGEE_BASE_URL}/${BUNGEE_JOB_ID}/artifact/bootstrap/target/BungeeCord.jar`
+  If set, can specify a custom, fully qualified URL  of the BungeeCord.jar; however, you won't be able reference the other environment variables from within a `docker run` a compose file. Defaults to:
+
+  * (type: `BUNGEECORD`): `${BUNGEE_BASE_URL}/${BUNGEE_JOB_ID}/artifact/bootstrap/target/BungeeCord.jar`
+  * (type: `WATERFALL`): `${BUNGEE_BASE_URL}/${BUNGEE_JOB_ID}/artifact/Waterfall-Proxy/bootstrap/target/Waterfall.jar`
 
 ## Volumes
 
