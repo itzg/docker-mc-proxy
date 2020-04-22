@@ -96,7 +96,7 @@ fi
 
 if [ -f /var/run/default-config.yml -a ! -f $BUNGEE_HOME/config.yml ]; then
     echo "Installing default configuration"
-    cp /var/run/default-config.yml /config.yml
+    cp /var/run/default-config.yml $BUNGEE_HOME/config.yml
     if [ $UID == 0 ]; then
         chown bungeecord: $BUNGEE_HOME/config.yml
     fi
