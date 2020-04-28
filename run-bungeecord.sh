@@ -111,6 +111,12 @@ if [ "${REPLACE_ENV_VARIABLES^^}" = "TRUE" ]; then
     if [[ "$name" = $ENV_VARIABLE_PREFIX* ]] \
         && [[ $value =~ ^[0-9a-zA-Z_:/=?.+\-]*$ ]] \
         && [[ $name =~ ^[0-9a-zA-Z_\-]*$ ]]; then
+      # Read content from file
+      if [[ $name = *"_FILE" ]] && [[ -f $value ]]; then
+        name="${name/_File/}"
+        value=$(<$value)
+      fi
+
       echo "Replacing $name with $value ..."
       find $BUNGEE_HOME -type f \
           \( -name "*.yml" -or -name "*.yaml" -or -name "*.txt" -or -name "*.cfg" \
