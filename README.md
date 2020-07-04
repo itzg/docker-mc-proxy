@@ -15,6 +15,24 @@ docker run ... -e ONLINE_MODE=FALSE itzg/minecraft-server
 
 [Here](docs/docker-compose.yml) is an example Docker Compose file.
 
+## Healthcheck
+
+This image contains [mc-monitor](https://github.com/itzg/mc-monitor) and uses
+its `status` command to continually check on the container's. That can be observed
+from the `STATUS` column of `docker ps`
+
+```
+CONTAINER ID    IMAGE    COMMAND                         CREATED           STATUS                     PORTS                       NAMES
+b418af073764    mc       "/usr/bin/run-bungeecord.sh"    43 seconds ago    Up 41 seconds (healthy)    0.0.0.0:25577->25577/tcp    mc
+```
+
+You can also query the container's health in a script friendly way:
+
+```
+> docker container inspect -f "{{.State.Health.Status}}" mc
+healthy
+```
+
 ## Environment Settings
 
 * **TYPE**=BUNGEECORD
