@@ -5,7 +5,8 @@ WORKDIR /server
 
 RUN apk --no-cache add curl bash sudo
 
-EXPOSE 25577
+ENV SERVER_PORT=25577
+EXPOSE $SERVER_PORT
 
 RUN set -x \
 	&& addgroup -g 1000 -S bungeecord \
