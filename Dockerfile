@@ -28,6 +28,8 @@ RUN easy-add --var os=${TARGETOS} --var arch=${TARGETARCH}${TARGETVARIANT} \
  --from https://github.com/itzg/{{.app}}/releases/download/{{.version}}/{{.app}}_{{.version}}_{{.os}}_{{.arch}}.tar.gz
 COPY health.sh /
 
+RUN dos2unix /health.sh && chmod +x /health.sh
+
 CMD ["/usr/bin/run-bungeecord.sh"]
 HEALTHCHECK --start-period=10s CMD /health.sh
 
