@@ -65,6 +65,18 @@ healthy
   -e PLUGINS=https://www.example.com/plugin1.jar,https://www.example.com/plugin2.jar
   ```
 
+* **ENABLE_RCON**
+
+  Enable the rcon server (that use third plugin for work [orblazer/bungee-rcon](https://github.com/orblazer/bungee-rcon), its automatically downloaded)
+
+* **RCON_PORT**
+
+  Define the port for rcon
+
+* **RCON_PASSWORD**
+
+  Define the password for rcon
+
 ## Optional Environment Settings
 
 * **BUNGEE_JOB_ID**=lastStableBuild
@@ -116,6 +128,43 @@ healthy
   ```
   -p 25565:25577
   ```
+
+## Interacting with the server
+
+[RCON](http://wiki.vg/RCON) is enabled by default, so you can `exec` into the container to
+access the Minecraft server console:
+
+```
+docker exec -i mc rcon-cli
+```
+
+Note: The `-i` is required for interactive use of rcon-cli.
+
+To run a simple, one-shot command, such as stopping a Bungeecord server, pass the command as
+arguments to `rcon-cli`, such as:
+
+```
+docker exec mc rcon-cli en
+```
+
+_The `-i` is not needed in this case._
+
+In order to attach and interact with the Bungeecord server, add `-it` when starting the container, such as
+
+    docker run -d -it -p 25565:25577 --name mc itzg/docker-bungeecord
+
+With that you can attach and interact at any time using
+
+    docker attach mc
+
+and then Control-p Control-q to **detach**.
+
+For remote access, configure your Docker daemon to use a `tcp` socket (such as `-H tcp://0.0.0.0:2375`)
+and attach from another machine:
+
+    docker -H $HOST:2375 attach mc
+
+Unless you're on a home/private LAN, you should [enable TLS access](https://docs.docker.com/articles/https/).
 
 ## BungeeCord Configuration
 
