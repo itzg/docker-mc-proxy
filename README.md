@@ -67,7 +67,7 @@ healthy
 
 * **ENABLE_RCON**
 
-  Enable the rcon server (that use third plugin for work [orblazer/bungee-rcon](https://github.com/orblazer/bungee-rcon), its automatically downloaded)
+  Enable the rcon server (that uses a third-party plugin to work, [orblazer/bungee-rcon](https://github.com/orblazer/bungee-rcon), which is automatically downloaded)
 
 * **RCON_PORT**
 
@@ -132,7 +132,7 @@ healthy
 ## Interacting with the server
 
 [RCON](http://wiki.vg/RCON) is enabled by default, so you can `exec` into the container to
-access the Minecraft server console:
+access the Bungeecord server console:
 
 ```
 docker exec -i mc rcon-cli
