@@ -1,0 +1,6 @@
+# Port you want RCON to listen
+port: ${PORT}
+# Password you want to authenticate connection with
+password: ${PASSWORD}
+# This can be used if you want RCON response to be (not) colored
+colored: false

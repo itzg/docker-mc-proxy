@@ -2,7 +2,9 @@
 
 : ${TYPE:=BUNGEECORD}
 : ${MEMORY:=512m}
+: ${RCON_JAR_VERSION:=1.0.0}
 BUNGEE_HOME=/server
+RCON_JAR_URL=https://github.com/orblazer/bungee-rcon/releases/download/v${RCON_JAR_VERSION}/bungee-rcon-${RCON_JAR_VERSION}.jar
 
 function isURL {
   local value=$1
@@ -87,6 +89,24 @@ do
       ;;
   esac
 done
+fi
+
+# Download rcon plugin
+if [ "${ENABLE_RCON^^}" = "TRUE" ] && [[ ! -e $BUNGEE_HOME/plugins/${RCON_JAR_URL##*/} ]]; then
+  echo "Downloading rcon plugin"
+  mkdir -p $BUNGEE_HOME/plugins/bungee-rcon
+
+  if ! curl -sSL -o "$BUNGEE_HOME/plugins/${RCON_JAR_URL##*/}" $RCON_JAR_URL; then
+    echo "ERROR: failed to download from $RCON_JAR_URL to /tmp/${RCON_JAR_URL##*/}"
+    exit 2
+  fi
+
+  echo "Copy rcon configuration"
+  sed -i 's#${PORT}#'"$RCON_PORT"'#g' /tmp/rcon-config.yml
+  sed -i 's#${PASSWORD}#'"$RCON_PASSWORD"'#g' /tmp/rcon-config.yml
+
+  mv /tmp/rcon-config.yml "$BUNGEE_HOME/plugins/bungee-rcon/config.yml"
+  rm -f /tmp/rcon-config.yml
 fi
 
 if [ -d /config ]; then
