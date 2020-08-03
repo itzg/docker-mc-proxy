@@ -101,7 +101,14 @@ healthy
   If set, can specify a custom, fully qualified URL  of the BungeeCord.jar; however, you won't be able reference the other environment variables from within a `docker run` a compose file. Defaults to:
 
   * (type: `BUNGEECORD`): `${BUNGEE_BASE_URL}/${BUNGEE_JOB_ID}/artifact/bootstrap/target/BungeeCord.jar`
-  * (type: `WATERFALL`): `${BUNGEE_BASE_URL}/${BUNGEE_JOB_ID}/artifact/Waterfall-Proxy/bootstrap/target/Waterfall.jar`
+
+* **WATERFALL_VERSION**=latest
+
+  Only applies when `TYPE=WATERFALL`. If set, allows downloading a specific release stream of Waterfall.
+
+* **WATERFALL_BUILD_ID**=latest
+
+  Only applies when `TYPE=WATERFALL`. If set, allows downloading a specific build of Waterfall within the given version.
 
 ## Volumes
 

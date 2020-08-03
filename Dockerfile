@@ -3,9 +3,12 @@ FROM openjdk:8-alpine
 VOLUME ["/server"]
 WORKDIR /server
 
-RUN apk --no-cache add curl bash sudo
+# upgrade all packages since alpine jre8 base image tops out at 8u212
+RUN apk -U --no-cache upgrade
 
-ENV SERVER_PORT=25577 ENABLE_RCON=true RCON_PORT=25575 RCON_PASSWORD=
+RUN apk -U --no-cache add curl bash sudo jq
+
+ENV SERVER_PORT=25577 ENABLE_RCON=true RCON_PORT=25575
 EXPOSE $SERVER_PORT
 
 RUN set -x \

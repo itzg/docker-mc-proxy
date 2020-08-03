@@ -27,11 +27,13 @@ case "${TYPE^^}" in
   ;;
 
   WATERFALL)
-    : ${BUNGEE_BASE_URL:=https://papermc.io/ci/job/Waterfall/}
-    : ${BUNGEE_JOB_ID:=lastStableBuild}
-    : ${BUNGEE_JAR_URL:=${BUNGEE_BASE_URL}/${BUNGEE_JOB_ID}/artifact/Waterfall-Proxy/bootstrap/target/Waterfall.jar}
-    : ${BUNGEE_JAR_REVISION:=${BUNGEE_JOB_ID}}
-    BUNGEE_JAR=$BUNGEE_HOME/${BUNGEE_JAR:=Waterfall-${BUNGEE_JAR_REVISION}.jar}
+    : ${WATERFALL_VERSION:=latest}
+    : ${WATERFALL_BUILD_ID:=latest}
+    if [[ ${WATERFALL_VERSION^^} = LATEST ]]; then
+      WATERFALL_VERSION=$(curl -s https://papermc.io/api/v1/waterfall | jq -r '.versions[0]')
+    fi
+    BUNGEE_JAR_URL="https://papermc.io/api/v1/waterfall/${WATERFALL_VERSION}/${WATERFALL_BUILD_ID}/download"
+    BUNGEE_JAR=$BUNGEE_HOME/${BUNGEE_JAR:=Waterfall-${WATERFALL_VERSION}-${WATERFALL_BUILD_ID}.jar}
   ;;
 
   CUSTOM)
@@ -53,12 +55,14 @@ case "${TYPE^^}" in
   ;;
 esac
 
-if [[ ! -e $BUNGEE_JAR ]]; then
-    echo "Downloading ${BUNGEE_JAR_URL}"
-    if ! curl -o $BUNGEE_JAR -fsSL $BUNGEE_JAR_URL; then
-        echo "ERROR: failed to download" >&2
-        exit 2
-    fi
+if [ -f "$BUNGEE_JAR" ]; then
+  zarg="-z '$BUNGEE_JAR'"
+fi
+
+echo "Downloading ${BUNGEE_JAR_URL}"
+if ! curl -o "$BUNGEE_JAR" -fsSL $zarg $BUNGEE_JAR_URL; then
+    echo "ERROR: failed to download" >&2
+    exit 2
 fi
 
 if [ -d /plugins ]; then
