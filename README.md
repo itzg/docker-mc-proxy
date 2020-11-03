@@ -39,7 +39,7 @@ healthy
 
   The type of the server. When the type is set to `CUSTOM`, the environment setting `BUNGEE_JAR_URL` is required.
 
-  Possible values: `BUNGEECORD`, `WATERFALL`, `CUSTOM`
+  Possible values: [`BUNGEECORD`](https://www.spigotmc.org/wiki/bungeecord/), `[WATERFALL`](https://github.com/PaperMC/Waterfall), `CUSTOM`
 
 * **MEMORY**=512m
 
