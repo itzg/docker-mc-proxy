@@ -39,7 +39,11 @@ healthy
 
   The type of the server. When the type is set to `CUSTOM`, the environment setting `BUNGEE_JAR_URL` is required.
 
-  Possible values: [`BUNGEECORD`](https://www.spigotmc.org/wiki/bungeecord/), [`WATERFALL`](https://github.com/PaperMC/Waterfall), `CUSTOM`
+  Possible values: 
+  - [`BUNGEECORD`](https://www.spigotmc.org/wiki/bungeecord/)
+  - [`WATERFALL`](https://github.com/PaperMC/Waterfall)
+  - [`VELOCITY`](https://velocitypowered.com/)
+  - `CUSTOM`
 
 * **MEMORY**=512m
 
@@ -104,11 +108,15 @@ healthy
 
 * **WATERFALL_VERSION**=latest
 
-  Only applies when `TYPE=WATERFALL`. If set, allows downloading a specific release stream of Waterfall.
+  For `TYPE=WATERFALL`, allows downloading a specific release stream of Waterfall.
 
 * **WATERFALL_BUILD_ID**=latest
 
-  Only applies when `TYPE=WATERFALL`. If set, allows downloading a specific build of Waterfall within the given version.
+  For `TYPE=WATERFALL`, allows downloading a specific build of Waterfall within the given version.
+
+* **VELOCITY_VERSION**=1.1.0
+
+  For `TYPE=VELOCITY`, specifies the version of Velocity to download and run.
 
 ## Volumes
 

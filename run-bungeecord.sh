@@ -36,6 +36,12 @@ case "${TYPE^^}" in
     BUNGEE_JAR=$BUNGEE_HOME/${BUNGEE_JAR:=Waterfall-${WATERFALL_VERSION}-${WATERFALL_BUILD_ID}.jar}
   ;;
 
+  VELOCITY)
+    : ${VELOCITY_VERSION:=1.1.0}
+    BUNGEE_JAR_URL="https://versions.velocitypowered.com/download/${VELOCITY_VERSION}.jar"
+    BUNGEE_JAR=$BUNGEE_HOME/Velocity-${VELOCITY_VERSION}.jar
+  ;;
+
   CUSTOM)
     if isURL ${BUNGEE_JAR_URL}; then
       BUNGEE_JAR=$BUNGEE_HOME/$(basename ${BUNGEE_JAR_URL})
@@ -50,7 +56,7 @@ case "${TYPE^^}" in
 
   *)
       echo "Invalid type: '$TYPE'"
-      echo "Must be: BUNGEECORD, WATERFALL, CUSTOM"
+      echo "Must be: BUNGEECORD, WATERFALL, VELOCITY, CUSTOM"
       exit 1
   ;;
 esac
