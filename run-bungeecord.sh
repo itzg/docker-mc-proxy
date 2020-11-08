@@ -44,10 +44,10 @@ case "${TYPE^^}" in
 
   CUSTOM)
     if isURL ${BUNGEE_JAR_URL}; then
-      BUNGEE_JAR=$BUNGEE_HOME/$(basename ${BUNGEE_JAR_URL})
-    elif [[ -f ${BUNGEE_JAR_URL} ]]; then
       echo "Using custom server jar at ${BUNGEE_JAR_URL} ..."
       BUNGEE_JAR=${BUNGEE_JAR_URL}
+    elif [[ -f ${BUNGEE_JAR_URL} ]]; then
+      BUNGEE_JAR=$BUNGEE_HOME/$(basename ${BUNGEE_JAR_URL})
     else
       echo "BUNGEE_JAR_URL is not properly set to a URL or existing jar file"
       exit 2
@@ -61,14 +61,15 @@ case "${TYPE^^}" in
   ;;
 esac
 
-if [ -f "$BUNGEE_JAR" ]; then
-  zarg="-z '$BUNGEE_JAR'"
-fi
+BUNGEE_FILE_NAME=$BUNGEE_JAR
 
-echo "Downloading ${BUNGEE_JAR_URL}"
-if ! curl -o "$BUNGEE_JAR" -fsSL $zarg $BUNGEE_JAR_URL; then
-    echo "ERROR: failed to download" >&2
-    exit 2
+if ! [ -f "$BUNGEE_JAR" ]; then
+  BUNGEE_FILE_NAME=$(basename "$BUNGEE_JAR")
+  echo "Downloading ${BUNGEE_JAR_URL}"
+  if ! curl -o "$BUNGEE_FILE_NAME" -z "$BUNGEE_FILE_NAME" -fsSL $BUNGEE_JAR_URL; then
+      echo "ERROR: failed to download" >&2
+      exit 2
+  fi
 fi
 
 if [ -d /plugins ]; then
@@ -178,7 +179,7 @@ echo "Setting initial memory to ${INIT_MEMORY:-${MEMORY}} and max to ${MAX_MEMOR
 JVM_OPTS="-Xms${INIT_MEMORY:-${MEMORY}} -Xmx${MAX_MEMORY:-${MEMORY}} ${JVM_OPTS}"
 
 if [ $UID == 0 ]; then
-  exec sudo -E -u bungeecord java $JVM_OPTS -jar $BUNGEE_JAR "$@"
+  exec sudo -E -u bungeecord java $JVM_OPTS -jar $BUNGEE_FILE_NAME "$@"
 else
-  exec java $JVM_OPTS -jar $BUNGEE_JAR "$@"
+  exec java $JVM_OPTS -jar $BUNGEE_FILE_NAME "$@"
 fi
