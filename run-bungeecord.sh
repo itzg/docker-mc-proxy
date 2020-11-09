@@ -5,16 +5,7 @@
 : ${RCON_JAR_VERSION:=1.0.0}
 BUNGEE_HOME=/server
 RCON_JAR_URL=https://github.com/orblazer/bungee-rcon/releases/download/v${RCON_JAR_VERSION}/bungee-rcon-${RCON_JAR_VERSION}.jar
-
-function isURL {
-  local value=$1
-
-  if [[ ${value:0:8} == "https://" || ${value:0:7} == "http://" ]]; then
-    return 0
-  else
-    return 1
-  fi
-}
+download_required=true
 
 echo "Resolving type given ${TYPE}"
 case "${TYPE^^}" in
@@ -43,11 +34,12 @@ case "${TYPE^^}" in
   ;;
 
   CUSTOM)
-    if isURL ${BUNGEE_JAR_URL}; then
-      BUNGEE_JAR=$BUNGEE_HOME/$(basename ${BUNGEE_JAR_URL})
-    elif [[ -f ${BUNGEE_JAR_URL} ]]; then
+    if [[ -v BUNGEE_JAR_URL ]]; then
       echo "Using custom server jar at ${BUNGEE_JAR_URL} ..."
-      BUNGEE_JAR=${BUNGEE_JAR_URL}
+      BUNGEE_JAR=$BUNGEE_HOME/$(basename ${BUNGEE_JAR_URL})
+    elif [[ -v BUNGEE_JAR_FILE ]]; then
+      BUNGEE_JAR=${BUNGEE_JAR_FILE}
+      download_required=false
     else
       echo "BUNGEE_JAR_URL is not properly set to a URL or existing jar file"
       exit 2
@@ -61,14 +53,15 @@ case "${TYPE^^}" in
   ;;
 esac
 
-if [ -f "$BUNGEE_JAR" ]; then
-  zarg="-z '$BUNGEE_JAR'"
-fi
-
-echo "Downloading ${BUNGEE_JAR_URL}"
-if ! curl -o "$BUNGEE_JAR" -fsSL $zarg $BUNGEE_JAR_URL; then
-    echo "ERROR: failed to download" >&2
-    exit 2
+if [ "$download_required" = true ]; then
+  if [ -f "$BUNGEE_JAR" ]; then
+    zarg="-z '$BUNGEE_JAR'"
+  fi
+  echo "Downloading ${BUNGEE_JAR_URL}"
+  if ! curl -o "$BUNGEE_JAR" $zarg -fsSL "$BUNGEE_JAR_URL"; then
+      echo "ERROR: failed to download" >&2
+      exit 2
+  fi
 fi
 
 if [ -d /plugins ]; then
@@ -178,7 +171,7 @@ echo "Setting initial memory to ${INIT_MEMORY:-${MEMORY}} and max to ${MAX_MEMOR
 JVM_OPTS="-Xms${INIT_MEMORY:-${MEMORY}} -Xmx${MAX_MEMORY:-${MEMORY}} ${JVM_OPTS}"
 
 if [ $UID == 0 ]; then
-  exec sudo -E -u bungeecord java $JVM_OPTS -jar $BUNGEE_JAR "$@"
+  exec sudo -E -u bungeecord java $JVM_OPTS -jar "$BUNGEE_JAR" "$@"
 else
-  exec java $JVM_OPTS -jar $BUNGEE_JAR "$@"
+  exec java $JVM_OPTS -jar "$BUNGEE_JAR" "$@"
 fi

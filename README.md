@@ -105,6 +105,14 @@ healthy
   If set, can specify a custom, fully qualified URL  of the BungeeCord.jar; however, you won't be able reference the other environment variables from within a `docker run` a compose file. Defaults to:
 
   * (type: `BUNGEECORD`): `${BUNGEE_BASE_URL}/${BUNGEE_JOB_ID}/artifact/bootstrap/target/BungeeCord.jar`
+  
+  This takes precedence over `BUNGEE_JAR_FILE`.
+
+* **BUNGEE_JAR_FILE**
+
+  For `TYPE=CUSTOM`, allows setting a custom BungeeCord JAR that is located inside the container.
+  
+  Must be a valid path of an existing file.
 
 * **WATERFALL_VERSION**=latest
 
