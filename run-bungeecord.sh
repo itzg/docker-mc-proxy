@@ -5,6 +5,7 @@
 : ${RCON_JAR_VERSION:=1.0.0}
 BUNGEE_HOME=/server
 RCON_JAR_URL=https://github.com/orblazer/bungee-rcon/releases/download/v${RCON_JAR_VERSION}/bungee-rcon-${RCON_JAR_VERSION}.jar
+download_required=true
 
 echo "Resolving type given ${TYPE}"
 case "${TYPE^^}" in
@@ -36,7 +37,6 @@ case "${TYPE^^}" in
     if [[ -v BUNGEE_JAR_URL ]]; then
       echo "Using custom server jar at ${BUNGEE_JAR_URL} ..."
       BUNGEE_JAR=$BUNGEE_HOME/$(basename ${BUNGEE_JAR_URL})
-      download_required=true
     elif [[ -v BUNGEE_JAR_FILE ]]; then
       BUNGEE_JAR=${BUNGEE_JAR_FILE}
       download_required=false
