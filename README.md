@@ -141,7 +141,7 @@ healthy
 
   The `/config/config.yml` file in this volume will be copied accross on startup if it is newer than the config in `/server/config.yml`.
 
-  If `server-icon.png`, `modules.yml` or `waterfall.yml` also exists in the volume, they will also be copied if newer.
+  If `server-icon.png`, `modules.yml`, `waterfall.yml` or `messages.properties` also exists in the volume, they will also be copied if newer.
 
 ## Ports
 
