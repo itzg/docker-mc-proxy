@@ -18,12 +18,37 @@ case "${TYPE^^}" in
   ;;
 
   WATERFALL)
+    # Doc : https://papermc.io/api
     : ${WATERFALL_VERSION:=latest}
     : ${WATERFALL_BUILD_ID:=latest}
+
+    # Retrieve waterfal version
     if [[ ${WATERFALL_VERSION^^} = LATEST ]]; then
-      WATERFALL_VERSION=$(curl -s https://papermc.io/api/v1/waterfall | jq -r '.versions[0]')
+      WATERFALL_VERSION=$(curl -fsSL "https://papermc.io/api/v2/projects/waterfall" -H "accept: application/json" | jq -r '.versions[-1]')
+      if [ -z $WATERFALL_VERSION ]; then
+        echo "ERROR: failed to lookup PaperMC versions"
+        exit 1
+      fi
     fi
-    BUNGEE_JAR_URL="https://papermc.io/api/v1/waterfall/${WATERFALL_VERSION}/${WATERFALL_BUILD_ID}/download"
+
+    # Retrieve waterfall build
+    if [[ ${WATERFALL_BUILD_ID^^} = LATEST ]]; then
+      WATERFALL_BUILD_ID=$(curl -fsSL "https://papermc.io/api/v2/projects/waterfall/versions/${WATERFALL_VERSION}" -H  "accept: application/json" \
+        | jq '.builds[-1]')
+      if [ -z $WATERFALL_BUILD_ID ]; then
+          echo "ERROR: failed to lookup PaperMC build from version ${WATERFALL_VERSION}"
+          exit 1
+      fi
+    fi
+
+    WATERFALL_JAR=$(curl -fsSL "https://papermc.io/api/v2/projects/waterfall/versions/${WATERFALL_VERSION}/builds/${WATERFALL_BUILD_ID}" \
+      -H  "accept: application/json" | jq -r '.downloads.application.name')
+    if [ -z $WATERFALL_JAR ]; then
+      echo "ERROR: failed to lookup PaperMC download file from version=${WATERFALL_VERSION} build=${WATERFALL_BUILD_ID}"
+      exit 1
+    fi
+
+    BUNGEE_JAR_URL="https://papermc.io/api/v2/projects/waterfall/versions/${WATERFALL_VERSION}/builds/${WATERFALL_BUILD_ID}/downloads/${WATERFALL_JAR}"
     BUNGEE_JAR=$BUNGEE_HOME/${BUNGEE_JAR:=Waterfall-${WATERFALL_VERSION}-${WATERFALL_BUILD_ID}.jar}
   ;;
 
