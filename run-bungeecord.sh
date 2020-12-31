@@ -154,6 +154,10 @@ if [ -d /config ]; then
     if [ -f /config/waterfall.yml ]; then
       cp -u /config/waterfall.yml "$BUNGEE_HOME/waterfall.yml"
     fi
+    # Velocity config
+    if [ -f /config/velocity.toml ]; then
+      cp -u /config/velocity.toml "$BUNGEE_HOME/velocity.toml"
+    fi
     # Messages
     if [ -f /config/messages.properties ]; then
       cp -u /config/messages.properties "$BUNGEE_HOME/messages.properties"
