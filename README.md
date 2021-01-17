@@ -39,7 +39,11 @@ healthy
 
   The type of the server. When the type is set to `CUSTOM`, the environment setting `BUNGEE_JAR_URL` is required.
 
-  Possible values: `BUNGEECORD`, `WATERFALL`, `CUSTOM`
+  Possible values: 
+  - [`BUNGEECORD`](https://www.spigotmc.org/wiki/bungeecord/)
+  - [`WATERFALL`](https://github.com/PaperMC/Waterfall)
+  - [`VELOCITY`](https://velocitypowered.com/)
+  - `CUSTOM`
 
 * **MEMORY**=512m
 
@@ -101,14 +105,26 @@ healthy
   If set, can specify a custom, fully qualified URL  of the BungeeCord.jar; however, you won't be able reference the other environment variables from within a `docker run` a compose file. Defaults to:
 
   * (type: `BUNGEECORD`): `${BUNGEE_BASE_URL}/${BUNGEE_JOB_ID}/artifact/bootstrap/target/BungeeCord.jar`
+  
+  This takes precedence over `BUNGEE_JAR_FILE`.
+
+* **BUNGEE_JAR_FILE**
+
+  For `TYPE=CUSTOM`, allows setting a custom BungeeCord JAR that is located inside the container.
+  
+  Must be a valid path of an existing file.
 
 * **WATERFALL_VERSION**=latest
 
-  Only applies when `TYPE=WATERFALL`. If set, allows downloading a specific release stream of Waterfall.
+  For `TYPE=WATERFALL`, allows downloading a specific release stream of Waterfall.
 
 * **WATERFALL_BUILD_ID**=latest
 
-  Only applies when `TYPE=WATERFALL`. If set, allows downloading a specific build of Waterfall within the given version.
+  For `TYPE=WATERFALL`, allows downloading a specific build of Waterfall within the given version.
+
+* **VELOCITY_VERSION**=1.1.0
+
+  For `TYPE=VELOCITY`, specifies the version of Velocity to download and run.
 
 ## Volumes
 
@@ -124,6 +140,8 @@ healthy
 * **/config**
 
   The `/config/config.yml` file in this volume will be copied accross on startup if it is newer than the config in `/server/config.yml`.
+
+  If `server-icon.png`, `modules.yml`, `waterfall.yml` or `messages.properties` also exists in the volume, they will also be copied if newer.
 
 ## Ports
 
