@@ -6,7 +6,7 @@ WORKDIR /server
 # upgrade all packages since alpine jre8 base image tops out at 8u212
 RUN apk -U --no-cache upgrade
 
-RUN apk -U --no-cache add curl bash sudo jq
+RUN apk -U --no-cache add curl bash sudo jq fontconfig ttf-dejavu
 
 ENV SERVER_PORT=25577 ENABLE_RCON=true RCON_PORT=25575
 EXPOSE $SERVER_PORT
