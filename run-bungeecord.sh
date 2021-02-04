@@ -189,8 +189,8 @@ if [ "${REPLACE_ENV_VARIABLES^^}" = "TRUE" ]; then
 
       echo "Replacing $name with $value ..."
       find $BUNGEE_HOME -type f \
-          \( -name "*.yml" -or -name "*.yaml" -or -name "*.txt" -or -name "*.cfg" \
-          -or -name "*.conf" -or -name "*.properties" \) \
+          \( -name "*.yml" -or -name "*.yaml" -or -name "*.toml" -or -name "*.txt" \
+          -or -name "*.cfg" -or -name "*.conf" -or -name "*.properties" \) \
           -exec sed -i 's#${'"$name"'}#'"$value"'#g' {} \;
     fi
   done < <(env)
