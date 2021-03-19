@@ -53,7 +53,7 @@ case "${TYPE^^}" in
   ;;
 
   VELOCITY)
-    : ${VELOCITY_VERSION:=1.1.4}
+    : ${VELOCITY_VERSION:=latest}
     BUNGEE_JAR_URL="https://versions.velocitypowered.com/download/${VELOCITY_VERSION}.jar"
     BUNGEE_JAR=$BUNGEE_HOME/Velocity-${VELOCITY_VERSION}.jar
   ;;
