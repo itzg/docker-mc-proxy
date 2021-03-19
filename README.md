@@ -122,7 +122,7 @@ healthy
 
   For `TYPE=WATERFALL`, allows downloading a specific build of Waterfall within the given version.
 
-* **VELOCITY_VERSION**=1.1.0
+* **VELOCITY_VERSION**=latest
 
   For `TYPE=VELOCITY`, specifies the version of Velocity to download and run.
 
