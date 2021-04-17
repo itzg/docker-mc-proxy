@@ -1,26 +1,29 @@
-FROM openjdk:8-alpine
+FROM adoptopenjdk:8-jre-hotspot
 
 VOLUME ["/server"]
 WORKDIR /server
 
-# upgrade all packages since alpine jre8 base image tops out at 8u212
-RUN apk -U --no-cache upgrade
+RUN apt-get update \
+  && DEBIAN_FRONTEND=noninteractive \
+  apt-get install -y \
+    sudo \
+    net-tools \
+    curl \
+    jq \
+    tzdata \
+    nano \
+    unzip \
+    ttf-dejavu \
+    && apt-get clean
 
-RUN apk -U --no-cache add curl bash sudo jq fontconfig ttf-dejavu
-
-ENV SERVER_PORT=25577 ENABLE_RCON=true RCON_PORT=25575
-EXPOSE $SERVER_PORT
-
-RUN set -x \
-	&& addgroup -g 1000 -S bungeecord \
-	&& adduser -u 1000 -D -S -G bungeecord bungeecord \
-	&& addgroup bungeecord wheel
+RUN addgroup --gid 1000 bungeecord \
+  && adduser --system --shell /bin/false --uid 1000 --ingroup bungeecord --home /server bungeecord
 
 # hook into docker BuildKit --platform support
 # see https://docs.docker.com/engine/reference/builder/#automatic-platform-args-in-the-global-scope
-ARG TARGETOS=linux
-ARG TARGETARCH=amd64
-ARG TARGETVARIANT=""
+ARG TARGETOS
+ARG TARGETARCH
+ARG TARGETVARIANT
 
 ARG EASY_ADD_VER=0.7.1
 ADD https://github.com/itzg/easy-add/releases/download/${EASY_ADD_VER}/easy-add_${TARGETOS}_${TARGETARCH}${TARGETVARIANT} /usr/bin/easy-add
@@ -31,7 +34,6 @@ RUN easy-add --var os=${TARGETOS} --var arch=${TARGETARCH}${TARGETVARIANT} \
  --var version=0.6.0 --var app=mc-monitor --file {{.app}} \
  --from https://github.com/itzg/{{.app}}/releases/download/{{.version}}/{{.app}}_{{.version}}_{{.os}}_{{.arch}}.tar.gz
 COPY health.sh /
-RUN dos2unix /health.sh && chmod +x /health.sh
 
 # Add rcon
 RUN easy-add --var os=${TARGETOS} --var arch=${TARGETARCH}${TARGETVARIANT} \
@@ -39,6 +41,8 @@ RUN easy-add --var os=${TARGETOS} --var arch=${TARGETARCH}${TARGETVARIANT} \
  --from https://github.com/itzg/{{.app}}/releases/download/{{.version}}/{{.app}}_{{.version}}_{{.os}}_{{.arch}}.tar.gz
 COPY rcon-config.yml /tmp/rcon-config.yml
 
+ENV SERVER_PORT=25577 RCON_PORT=25575
+EXPOSE $SERVER_PORT
 
 CMD ["/usr/bin/run-bungeecord.sh"]
 HEALTHCHECK --start-period=10s CMD /health.sh

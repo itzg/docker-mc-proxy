@@ -204,7 +204,7 @@ echo "Setting initial memory to ${INIT_MEMORY:-${MEMORY}} and max to ${MAX_MEMOR
 JVM_OPTS="-Xms${INIT_MEMORY:-${MEMORY}} -Xmx${MAX_MEMORY:-${MEMORY}} ${JVM_OPTS}"
 
 if [ $UID == 0 ]; then
-  exec sudo -E -u bungeecord java $JVM_OPTS -jar "$BUNGEE_JAR" "$@"
+  exec sudo -E -u bungeecord $JAVA_HOME/bin/java $JVM_OPTS -jar "$BUNGEE_JAR" "$@"
 else
-  exec java $JVM_OPTS -jar "$BUNGEE_JAR" "$@"
+  exec $JAVA_HOME/bin/java $JVM_OPTS -jar "$BUNGEE_JAR" "$@"
 fi
