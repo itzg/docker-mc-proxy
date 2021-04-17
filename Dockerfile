@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM adoptopenjdk:11-jre-hotspot
 
 VOLUME ["/server"]
 WORKDIR /server
@@ -6,7 +6,6 @@ WORKDIR /server
 RUN apt-get update \
   && DEBIAN_FRONTEND=noninteractive \
   apt-get install -y \
-    openjdk-8-jre-headless \
     sudo \
     net-tools \
     curl \
