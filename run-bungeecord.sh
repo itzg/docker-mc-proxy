@@ -3,6 +3,7 @@
 : ${TYPE:=BUNGEECORD}
 : ${MEMORY:=512m}
 : ${RCON_JAR_VERSION:=1.0.0}
+: ${ENV_VARIABLE_PREFIX:=CFG_}
 BUNGEE_HOME=/server
 RCON_JAR_URL=https://github.com/orblazer/bungee-rcon/releases/download/v${RCON_JAR_VERSION}/bungee-rcon-${RCON_JAR_VERSION}.jar
 download_required=true
@@ -175,25 +176,27 @@ fi
 # Replace environment variables in config files
 if [ "${REPLACE_ENV_VARIABLES^^}" = "TRUE" ]; then
   echo "Replacing env variables in configs that match the prefix $ENV_VARIABLE_PREFIX..."
-  while IFS='=' read -r name value ; do
-    # check if name of env variable matches the prefix
-    # sanity check environment variables to avoid code injections
-    if [[ "$name" = $ENV_VARIABLE_PREFIX* ]] \
-        && [[ $value =~ ^[0-9a-zA-Z_:/=?.+\-]*$ ]] \
-        && [[ $name =~ ^[0-9a-zA-Z_\-]*$ ]]; then
-      # Read content from file
-      if [[ $name = *"_FILE" ]] && [[ -f $value ]]; then
-        name="${name/_FILE/}"
-        value=$(<$value)
-      fi
-
-      echo "Replacing $name with $value ..."
-      find $BUNGEE_HOME -type f \
-          \( -name "*.yml" -or -name "*.yaml" -or -name "*.toml" -or -name "*.txt" \
-          -or -name "*.cfg" -or -name "*.conf" -or -name "*.properties" \) \
-          -exec sed -i 's#${'"$name"'}#'"$value"'#g' {} \;
+  for name in $(compgen -v $ENV_VARIABLE_PREFIX); do
+    if [[ $name = *"_FILE" ]]; then
+      value=$(<${!name})
+      name="${name%_FILE}"
+    else
+      value=${!name}
     fi
-  done < <(env)
+
+    echo "Replacing $name ..."
+
+    value=${value//\\/\\\\}
+    value=${value//#/\\#}
+
+    find /server/ \
+        $dirExcludes \
+        -type f \
+        \( -name "*.yml" -or -name "*.yaml" -or -name "*.toml" -or -name "*.txt" \
+          -or -name "*.cfg" -or -name "*.conf" -or -name "*.properties" \) \
+        $fileExcludes \
+        -exec sed -i 's#${'"$name"'}#'"$value"'#g' {} \;
+  done
 fi
 
 if [ $UID == 0 ]; then
