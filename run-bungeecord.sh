@@ -8,6 +8,40 @@ BUNGEE_HOME=/server
 RCON_JAR_URL=https://github.com/orblazer/bungee-rcon/releases/download/v${RCON_JAR_VERSION}/bungee-rcon-${RCON_JAR_VERSION}.jar
 download_required=true
 
+function isTrue() {
+  local value=${1,,}
+
+  result=
+
+  case ${value} in
+  true | on)
+    result=0
+    ;;
+  *)
+    result=1
+    ;;
+  esac
+
+  return ${result}
+}
+
+function isDebugging() {
+  if isTrue "${DEBUG:-false}"; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+function handleDebugMode() {
+  if isDebugging; then
+    set -x
+    extraCurlArgs=(-v)
+  fi
+}
+
+handleDebugMode
+
 echo "Resolving type given ${TYPE}"
 case "${TYPE^^}" in
   BUNGEECORD)
@@ -79,7 +113,7 @@ case "${TYPE^^}" in
   ;;
 esac
 
-if [ "$download_required" = true ]; then
+if isTrue "$download_required"; then
   if [ -f "$BUNGEE_JAR" ]; then
     zarg="-z '$BUNGEE_JAR'"
   fi
@@ -121,7 +155,7 @@ done
 fi
 
 # Download rcon plugin
-if [ "${ENABLE_RCON^^}" = "TRUE" ] && [[ ! -e $BUNGEE_HOME/plugins/${RCON_JAR_URL##*/} ]]; then
+if isTrue "${ENABLE_RCON}" && [[ ! -e $BUNGEE_HOME/plugins/${RCON_JAR_URL##*/} ]]; then
   echo "Downloading rcon plugin"
   mkdir -p $BUNGEE_HOME/plugins/bungee-rcon
 
@@ -174,7 +208,7 @@ if [ -f /var/run/default-config.yml -a ! -f $BUNGEE_HOME/config.yml ]; then
 fi
 
 # Replace environment variables in config files
-if [ "${REPLACE_ENV_VARIABLES^^}" = "TRUE" ]; then
+if isTrue "${REPLACE_ENV_VARIABLES}"; then
   echo "Replacing env variables in configs that match the prefix $ENV_VARIABLE_PREFIX..."
   for name in $(compgen -v $ENV_VARIABLE_PREFIX); do
     if [[ $name = *"_FILE" ]]; then
@@ -189,12 +223,17 @@ if [ "${REPLACE_ENV_VARIABLES^^}" = "TRUE" ]; then
     value=${value//\\/\\\\}
     value=${value//#/\\#}
 
+    if isDebugging; then
+      findDebug="-print"
+    fi
+
     find /server/ \
         $dirExcludes \
         -type f \
         \( -name "*.yml" -or -name "*.yaml" -or -name "*.toml" -or -name "*.txt" \
           -or -name "*.cfg" -or -name "*.conf" -or -name "*.properties" \) \
         $fileExcludes \
+        $findDebug \
         -exec sed -i 's#${'"$name"'}#'"$value"'#g' {} \;
   done
 fi
