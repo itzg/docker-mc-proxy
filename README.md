@@ -126,6 +126,10 @@ healthy
 
   For `TYPE=VELOCITY`, specifies the version of Velocity to download and run.
 
+* **HEALTH_HOST**=localhost
+
+  Allows for configuring the host contacted for container health check.
+
 ## Volumes
 
 * **/server**
