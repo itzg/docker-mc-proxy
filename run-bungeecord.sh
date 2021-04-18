@@ -231,7 +231,7 @@ if isTrue "${REPLACE_ENV_VARIABLES}"; then
         $dirExcludes \
         -type f \
         \( -name "*.yml" -or -name "*.yaml" -or -name "*.toml" -or -name "*.txt" \
-          -or -name "*.cfg" -or -name "*.conf" -or -name "*.properties" \) \
+          -or -name "*.cfg" -or -name "*.conf" -or -name "*.properties" -or -name "*.hjson" -or -name "*.json" \) \
         $fileExcludes \
         $findDebug \
         -exec sed -i 's#${'"$name"'}#'"$value"'#g' {} \;
