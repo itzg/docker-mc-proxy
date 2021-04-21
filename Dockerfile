@@ -1,4 +1,4 @@
-FROM adoptopenjdk:11-jre-hotspot
+FROM adoptopenjdk:8-jre-hotspot
 
 VOLUME ["/server"]
 WORKDIR /server
