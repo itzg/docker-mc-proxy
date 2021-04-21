@@ -166,11 +166,11 @@ healthy
 
 The following table shows the Java versions and CPU architectures supported by the image tags:
 
-Tag | Java | Architectures
-----+------+--------------
-latest | 11 | amd64, arm64, armv7
-java8  | 8  | amd64, arm64, armv7
-java11 | 11 | amd64, arm64, armv7
+| Tag    | Java | Architectures       |
+|--------|------|---------------------|
+| latest | 11   | amd64, arm64, armv7 |
+| java8  | 8    | amd64, arm64, armv7 |
+| java11 | 11   | amd64, arm64, armv7 |
 
 ## Interacting with the server
 
