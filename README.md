@@ -130,6 +130,10 @@ healthy
 
   Allows for configuring the host contacted for container health check.
 
+* **HEALTH_USE_PROXY**=false
+
+  Set to "true" when using Bungeecord's `proxy_protocol` option
+
 ## Volumes
 
 * **/server**
