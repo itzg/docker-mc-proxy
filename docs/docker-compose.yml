@@ -13,4 +13,4 @@ services:
     ports:
       - 25565:25577
     volumes:
-      - ./config.yml:/server/config.yml
+      - ./config.yml:/config/config.yml

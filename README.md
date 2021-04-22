@@ -130,6 +130,10 @@ healthy
 
   Allows for configuring the host contacted for container health check.
 
+* **HEALTH_USE_PROXY**=false
+
+  Set to "true" when using Bungeecord's `proxy_protocol` option
+
 ## Volumes
 
 * **/server**
@@ -162,11 +166,11 @@ healthy
 
 The following table shows the Java versions and CPU architectures supported by the image tags:
 
-Tag | Java | Architectures
-----+------+--------------
-latest | 11 | amd64, arm64, armv7
-java8  | 8  | amd64, arm64, armv7
-java11 | 11 | amd64, arm64, armv7
+| Tag    | Java | Architectures       |
+|--------|------|---------------------|
+| latest | 11   | amd64, arm64, armv7 |
+| java8  | 8    | amd64, arm64, armv7 |
+| java11 | 11   | amd64, arm64, armv7 |
 
 ## Interacting with the server
 
@@ -190,7 +194,7 @@ _The `-i` is not needed in this case._
 
 In order to attach and interact with the Bungeecord server, add `-it` when starting the container, such as
 
-    docker run -d -it -p 25565:25577 --name mc itzg/docker-bungeecord
+    docker run -d -it -p 25565:25577 --name mc itzg/bungeecord
 
 With that you can attach and interact at any time using
 
