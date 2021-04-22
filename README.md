@@ -194,7 +194,7 @@ _The `-i` is not needed in this case._
 
 In order to attach and interact with the Bungeecord server, add `-it` when starting the container, such as
 
-    docker run -d -it -p 25565:25577 --name mc itzg/docker-bungeecord
+    docker run -d -it -p 25565:25577 --name mc itzg/bungeecord
 
 With that you can attach and interact at any time using
 
