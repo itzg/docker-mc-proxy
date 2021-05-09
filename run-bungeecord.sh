@@ -126,7 +126,7 @@ fi
 
 if [ -d /plugins ]; then
     echo "Copying BungeeCord plugins over..."
-    cp -r /plugins $BUNGEE_HOME
+    cp -ru /plugins $BUNGEE_HOME
 fi
 
 # If supplied with a URL for a plugin download it.
