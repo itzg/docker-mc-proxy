@@ -168,11 +168,11 @@ if [ "${TYPE^^}" = "VELOCITY" ]; then # Download UnioDex/VelocityRcon plugin
     fi
 
     echo "Copy Velocity rcon configuration"
-    sed -i 's#${PORT}#'"$RCON_PORT"'#g' /tmp/rcon-velocity-config.toml
-    sed -i 's#${PASSWORD}#'"$RCON_PASSWORD"'#g' /tmp/rcon-velocity-config.toml
+    sed -i 's#${PORT}#'"$RCON_PORT"'#g' /templates/rcon-velocity-config.toml
+    sed -i 's#${PASSWORD}#'"$RCON_PASSWORD"'#g' /templates/rcon-velocity-config.toml
 
-    mv /tmp/rcon-velocity-config.toml "$BUNGEE_HOME/plugins/velocityrcon/rcon.toml"
-    rm -f /tmp/rcon-velocity-config.toml
+    mv /templates/rcon-velocity-config.toml "$BUNGEE_HOME/plugins/velocityrcon/rcon.toml"
+    rm -f /templates/rcon-velocity-config.toml
   fi
 else # Download orblazer/bungee-rcon plugin
   if isTrue "${ENABLE_RCON}" && [[ ! -e $BUNGEE_HOME/plugins/${RCON_JAR_URL##*/} ]]; then
@@ -185,11 +185,11 @@ else # Download orblazer/bungee-rcon plugin
     fi
 
     echo "Copy Bungee rcon configuration"
-    sed -i 's#${PORT}#'"$RCON_PORT"'#g' /tmp/rcon-config.yml
-    sed -i 's#${PASSWORD}#'"$RCON_PASSWORD"'#g' /tmp/rcon-config.yml
+    sed -i 's#${PORT}#'"$RCON_PORT"'#g' /templates/rcon-config.yml
+    sed -i 's#${PASSWORD}#'"$RCON_PASSWORD"'#g' /templates/rcon-config.yml
 
-    mv /tmp/rcon-config.yml "$BUNGEE_HOME/plugins/bungee-rcon/config.yml"
-    rm -f /tmp/rcon-config.yml
+    mv /templates/rcon-config.yml "$BUNGEE_HOME/plugins/bungee-rcon/config.yml"
+    rm -f /templates/rcon-config.yml
   fi
 fi
 
