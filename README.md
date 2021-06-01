@@ -71,7 +71,9 @@ healthy
 
 * **ENABLE_RCON**
 
-  Enable the rcon server (that uses a third-party plugin to work, [orblazer/bungee-rcon](https://github.com/orblazer/bungee-rcon), which is automatically downloaded)
+  Enable the rcon server (uses a third-party plugin to work).
+  - [orblazer/bungee-rcon](https://github.com/orblazer/bungee-rcon) for `BUNGEECORD`, `WATERFALL`, and `CUSTOM`
+  - [UnioDex/VelocityRcon](https://github.com/UnioDex/VelocityRcon) for `VELOCITY`
 
 * **RCON_PORT**
 

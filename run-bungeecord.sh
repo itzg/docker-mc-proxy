@@ -3,9 +3,11 @@
 : ${TYPE:=BUNGEECORD}
 : ${MEMORY:=512m}
 : ${RCON_JAR_VERSION:=1.0.0}
+: ${RCON_VELOCITY_JAR_VERSION:=1.0}
 : ${ENV_VARIABLE_PREFIX:=CFG_}
 BUNGEE_HOME=/server
 RCON_JAR_URL=https://github.com/orblazer/bungee-rcon/releases/download/v${RCON_JAR_VERSION}/bungee-rcon-${RCON_JAR_VERSION}.jar
+RCON_VELOCITY_JAR_URL=https://github.com/UnioDex/VelocityRcon/releases/download/v${RCON_VELOCITY_JAR_VERSION}/VelocityRcon.jar
 download_required=true
 
 function isTrue() {
@@ -57,7 +59,7 @@ case "${TYPE^^}" in
     : ${WATERFALL_VERSION:=latest}
     : ${WATERFALL_BUILD_ID:=latest}
 
-    # Retrieve waterfal version
+    # Retrieve waterfall version
     if [[ ${WATERFALL_VERSION^^} = LATEST ]]; then
       WATERFALL_VERSION=$(curl -fsSL "https://papermc.io/api/v2/projects/waterfall" -H "accept: application/json" | jq -r '.versions[-1]')
       if [ -z $WATERFALL_VERSION ]; then
@@ -155,21 +157,40 @@ done
 fi
 
 # Download rcon plugin
-if isTrue "${ENABLE_RCON}" && [[ ! -e $BUNGEE_HOME/plugins/${RCON_JAR_URL##*/} ]]; then
-  echo "Downloading rcon plugin"
-  mkdir -p $BUNGEE_HOME/plugins/bungee-rcon
+if [ "${TYPE^^}" = "VELOCITY" ]; then # Download UnioDex/VelocityRcon plugin
+  if isTrue "${ENABLE_RCON}" && [[ ! -e $BUNGEE_HOME/plugins/${RCON_VELOCITY_JAR_URL##*/} ]]; then
+    echo "Downloading Velocity rcon plugin"
+    mkdir -p $BUNGEE_HOME/plugins/velocityrcon
 
-  if ! curl -sSL -o "$BUNGEE_HOME/plugins/${RCON_JAR_URL##*/}" $RCON_JAR_URL; then
-    echo "ERROR: failed to download from $RCON_JAR_URL to /tmp/${RCON_JAR_URL##*/}"
-    exit 2
+    if ! curl -sSL -o "$BUNGEE_HOME/plugins/${RCON_VELOCITY_JAR_URL##*/}" $RCON_VELOCITY_JAR_URL; then
+      echo "ERROR: failed to download from $RCON_VELOCITY_JAR_URL to /tmp/${RCON_VELOCITY_JAR_URL##*/}"
+      exit 2
+    fi
+
+    echo "Copy Velocity rcon configuration"
+    sed -i 's#${PORT}#'"$RCON_PORT"'#g' /templates/rcon-velocity-config.toml
+    sed -i 's#${PASSWORD}#'"$RCON_PASSWORD"'#g' /templates/rcon-velocity-config.toml
+
+    mv /templates/rcon-velocity-config.toml "$BUNGEE_HOME/plugins/velocityrcon/rcon.toml"
+    rm -f /templates/rcon-velocity-config.toml
   fi
+else # Download orblazer/bungee-rcon plugin
+  if isTrue "${ENABLE_RCON}" && [[ ! -e $BUNGEE_HOME/plugins/${RCON_JAR_URL##*/} ]]; then
+    echo "Downloading Bungee rcon plugin"
+    mkdir -p $BUNGEE_HOME/plugins/bungee-rcon
 
-  echo "Copy rcon configuration"
-  sed -i 's#${PORT}#'"$RCON_PORT"'#g' /tmp/rcon-config.yml
-  sed -i 's#${PASSWORD}#'"$RCON_PASSWORD"'#g' /tmp/rcon-config.yml
+    if ! curl -sSL -o "$BUNGEE_HOME/plugins/${RCON_JAR_URL##*/}" $RCON_JAR_URL; then
+      echo "ERROR: failed to download from $RCON_JAR_URL to /tmp/${RCON_JAR_URL##*/}"
+      exit 2
+    fi
 
-  mv /tmp/rcon-config.yml "$BUNGEE_HOME/plugins/bungee-rcon/config.yml"
-  rm -f /tmp/rcon-config.yml
+    echo "Copy Bungee rcon configuration"
+    sed -i 's#${PORT}#'"$RCON_PORT"'#g' /templates/rcon-config.yml
+    sed -i 's#${PASSWORD}#'"$RCON_PASSWORD"'#g' /templates/rcon-config.yml
+
+    mv /templates/rcon-config.yml "$BUNGEE_HOME/plugins/bungee-rcon/config.yml"
+    rm -f /templates/rcon-config.yml
+  fi
 fi
 
 if [ -d /config ]; then
