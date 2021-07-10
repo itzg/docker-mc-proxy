@@ -1,8 +1,9 @@
+
 This is a Docker image of [BungeeCord](https://www.spigotmc.org/wiki/bungeecord/)
 and is intended to be used at the front-end of a cluster of
 [itzg/minecraft-server](https://hub.docker.com/r/itzg/minecraft-server/) containers.
 
-[![Docker Automated buil](https://img.shields.io/docker/automated/itzg/bungeecord.svg)](https://hub.docker.com/r/itzg/bungeecord/)
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/itzg/docker-bungeecord/Build%20and%20Publish)](https://github.com/itzg/docker-bungeecord/actions/workflows/main.yml)
 
 ## Using with itzg/minecraft-server image
 
@@ -69,9 +70,24 @@ healthy
   -e PLUGINS=https://www.example.com/plugin1.jar,https://www.example.com/plugin2.jar
   ```
 
+* **SPIGET_PLUGINS**
+
+  The `SPIGET_PLUGINS` variable can be set with a comma-separated list of SpigotMC resource IDs to automatically download [SpigotMC plugins](https://www.spigotmc.org/resources/) using [the spiget API](https://spiget.org/). Resources that are zip files will be expanded into the plugins directory and resources that are simply jar files will be moved there.
+  
+  > NOTE: the variable is purposely spelled SPIG**E**T with an "E"
+  
+  The **resource ID** can be located from the numerical part of the URL after the shortname and a dot. For example, the ID is **313** from
+
+  ```
+  https://www.spigotmc.org/resources/bungeetablistplus.313/
+                                                       ===
+  ```
+
 * **ENABLE_RCON**
 
-  Enable the rcon server (that uses a third-party plugin to work, [orblazer/bungee-rcon](https://github.com/orblazer/bungee-rcon), which is automatically downloaded)
+  Enable the rcon server (uses a third-party plugin to work).
+  - [orblazer/bungee-rcon](https://github.com/orblazer/bungee-rcon) for `BUNGEECORD`, `WATERFALL`, and `CUSTOM`
+  - [UnioDex/VelocityRcon](https://github.com/UnioDex/VelocityRcon) for `VELOCITY`
 
 * **RCON_PORT**
 
@@ -260,7 +276,7 @@ database:
 This is how your `docker-compose.yml` file could look like:
 
 ```yml
-version: "3"
+version: "3.8"
 # Other docker-compose examples in /examples
 
 services:

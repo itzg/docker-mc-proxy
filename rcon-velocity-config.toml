@@ -1,0 +1,3 @@
+rcon-port = "${PORT}"
+rcon-password = "${PASSWORD}"
+rcon-colored = false

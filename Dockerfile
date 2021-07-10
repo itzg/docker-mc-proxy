@@ -39,7 +39,8 @@ COPY health.sh /
 RUN easy-add --var os=${TARGETOS} --var arch=${TARGETARCH}${TARGETVARIANT} \
  --var version=1.4.7 --var app=rcon-cli --file {{.app}} \
  --from https://github.com/itzg/{{.app}}/releases/download/{{.version}}/{{.app}}_{{.version}}_{{.os}}_{{.arch}}.tar.gz
-COPY rcon-config.yml /tmp/rcon-config.yml
+COPY rcon-config.yml /templates/rcon-config.yml
+COPY rcon-velocity-config.toml /templates/rcon-velocity-config.toml 
 
 ENV SERVER_PORT=25577 RCON_PORT=25575
 EXPOSE $SERVER_PORT

@@ -1,0 +1,10 @@
+version: "3"
+
+services:
+  proxy:
+    build:
+      context: ..
+    environment:
+      SPIGET_PLUGINS: 313
+    ports:
+      - 25565:25577
