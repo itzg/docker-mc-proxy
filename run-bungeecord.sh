@@ -167,10 +167,10 @@ esac
 
 if isTrue "$download_required"; then
   if [ -f "$BUNGEE_JAR" ]; then
-    zarg="-z '$BUNGEE_JAR'"
+    zarg=(-z "$BUNGEE_JAR")
   fi
   log "Downloading ${BUNGEE_JAR_URL}"
-  if ! curl -o "$BUNGEE_JAR" $zarg -fsSL "$BUNGEE_JAR_URL"; then
+  if ! curl -o "$BUNGEE_JAR" ${zarg[@]} -fsSL "$BUNGEE_JAR_URL"; then
       echo "ERROR: failed to download" >&2
       exit 2
   fi
