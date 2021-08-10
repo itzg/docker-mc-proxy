@@ -6,6 +6,7 @@
 : ${RCON_VELOCITY_JAR_VERSION:=1.0}
 : ${ENV_VARIABLE_PREFIX:=CFG_}
 : ${SPIGET_PLUGINS:=}
+: ${NETWORKADDRESS_CACHE_TTL:=60}
 BUNGEE_HOME=/server
 RCON_JAR_URL=https://github.com/orblazer/bungee-rcon/releases/download/v${RCON_JAR_VERSION}/bungee-rcon-${RCON_JAR_VERSION}.jar
 RCON_VELOCITY_JAR_URL=https://github.com/UnioDex/VelocityRcon/releases/download/v${RCON_VELOCITY_JAR_VERSION}/VelocityRcon.jar
@@ -327,7 +328,12 @@ if [ $UID == 0 ]; then
 fi
 
 log "Setting initial memory to ${INIT_MEMORY:-${MEMORY}} and max to ${MAX_MEMORY:-${MEMORY}}"
-JVM_OPTS="-Xms${INIT_MEMORY:-${MEMORY}} -Xmx${MAX_MEMORY:-${MEMORY}} ${JVM_OPTS}"
+JVM_OPTS="
+-Xms${INIT_MEMORY:-${MEMORY}}
+-Xmx${MAX_MEMORY:-${MEMORY}}
+-Dnetworkaddress.cache.ttl=${NETWORKADDRESS_CACHE_TTL}
+${JVM_OPTS}
+"
 
 if [ $UID == 0 ]; then
   exec sudo -E -u bungeecord $JAVA_HOME/bin/java $JVM_OPTS -jar "$BUNGEE_JAR" "$@"

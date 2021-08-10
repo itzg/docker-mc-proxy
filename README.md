@@ -62,6 +62,10 @@ healthy
 
   Additional -X options to pass to the JVM.
 
+* **NETWORKADDRESS_CACHE_TTL**=60
+
+  Number of seconds to cache the successful network address lookups. A lower value is helpful when Minecraft server containers are restarted and/or rescheduled and re-assigned a new container IP address.
+
 * **PLUGINS**
 
   Used to download a comma seperated list of *.jar urls to the plugins folder.
