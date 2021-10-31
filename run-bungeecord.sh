@@ -1,12 +1,14 @@
 #!/bin/bash
 
-: ${TYPE:=BUNGEECORD}
-: ${MEMORY:=512m}
-: ${RCON_JAR_VERSION:=1.0.0}
-: ${RCON_VELOCITY_JAR_VERSION:=1.0}
-: ${ENV_VARIABLE_PREFIX:=CFG_}
-: ${SPIGET_PLUGINS:=}
-: ${NETWORKADDRESS_CACHE_TTL:=60}
+: "${TYPE:=BUNGEECORD}"
+: "${RCON_JAR_VERSION:=1.0.0}"
+: "${RCON_VELOCITY_JAR_VERSION:=1.0}"
+: "${ENV_VARIABLE_PREFIX:=CFG_}"
+: "${SPIGET_PLUGINS:=}"
+: "${NETWORKADDRESS_CACHE_TTL:=60}"
+: "${INIT_MEMORY:=${MEMORY}}"
+: "${MAX_MEMORY:=${MEMORY}}"
+
 BUNGEE_HOME=/server
 RCON_JAR_URL=https://github.com/orblazer/bungee-rcon/releases/download/v${RCON_JAR_VERSION}/bungee-rcon-${RCON_JAR_VERSION}.jar
 RCON_VELOCITY_JAR_URL=https://github.com/UnioDex/VelocityRcon/releases/download/v${RCON_VELOCITY_JAR_VERSION}/VelocityRcon.jar
@@ -57,7 +59,7 @@ function containsJars() {
     if [[ $line =~ $pat ]]; then
       return 0
     fi
-  done <<<$(unzip -l "$file")
+  done <<<"$(unzip -l "$file")"
 
   return 1
 }
@@ -171,7 +173,7 @@ if isTrue "$download_required"; then
     zarg=(-z "$BUNGEE_JAR")
   fi
   log "Downloading ${BUNGEE_JAR_URL}"
-  if ! curl -o "$BUNGEE_JAR" ${zarg[@]} -fsSL "$BUNGEE_JAR_URL"; then
+  if ! curl -o "$BUNGEE_JAR" "${zarg[@]}" -fsSL "$BUNGEE_JAR_URL"; then
       echo "ERROR: failed to download" >&2
       exit 2
   fi
@@ -327,13 +329,15 @@ if [ $UID == 0 ]; then
   chown -R bungeecord:bungeecord $BUNGEE_HOME
 fi
 
-log "Setting initial memory to ${INIT_MEMORY:-${MEMORY}} and max to ${MAX_MEMORY:-${MEMORY}}"
-JVM_OPTS="
--Xms${INIT_MEMORY:-${MEMORY}}
--Xmx${MAX_MEMORY:-${MEMORY}}
--Dnetworkaddress.cache.ttl=${NETWORKADDRESS_CACHE_TTL}
-${JVM_OPTS}
-"
+if [[ ${INIT_MEMORY} || ${MAX_MEMORY} ]]; then
+  log "Setting initial memory to ${INIT_MEMORY:=${MEMORY}} and max to ${MAX_MEMORY:=${MEMORY}}"
+  if [[ ${INIT_MEMORY} ]]; then
+    JVM_OPTS="-Xms${INIT_MEMORY} ${JVM_OPTS}"
+  fi
+  if [[ ${MAX_MEMORY} ]]; then
+    JVM_OPTS="-Xmx${MAX_MEMORY} ${JVM_OPTS}"
+  fi
+fi
 
 if [ $UID == 0 ]; then
   exec sudo -E -u bungeecord $JAVA_HOME/bin/java $JVM_OPTS -jar "$BUNGEE_JAR" "$@"
