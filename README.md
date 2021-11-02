@@ -48,7 +48,7 @@ healthy
 
 * **MEMORY**=512m
 
-  The Java memory heap size to specify to the JVM. Setting this to an empty string will let the JVM calculate the heap size from the container declared memory limit.
+  The Java memory heap size to specify to the JVM. Setting this to an empty string will let the JVM calculate the heap size from the container declared memory limit. Be sure to consider adding `-XX:MaxRAMPercentage=<n>` (with `<n>` replaced) to `JVM_OPTS`, where the JVM default is 25%.
 
 * **INIT_MEMORY**=${MEMORY}
 
