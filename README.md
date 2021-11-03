@@ -48,7 +48,7 @@ healthy
 
 * **MEMORY**=512m
 
-  The Java memory heap size to specify to the JVM. Setting this to an empty string will let the JVM calculate the heap size from the container declared memory limit. Be sure to consider adding `-XX:MaxRAMPercentage=<n>` (with `<n>` replaced) to `JVM_OPTS`, where the JVM default is 25%.
+  The Java memory heap size to specify to the JVM. Setting this to an empty string will let the JVM calculate the heap size from the container declared memory limit. Be sure to consider adding `-XX:MaxRAMPercentage=<n>` (with `<n>` replaced) to `JVM_XX_OPTS`, where the JVM default is 25%.
 
 * **INIT_MEMORY**=${MEMORY}
 
@@ -58,9 +58,9 @@ healthy
 
   Can be set to use a different max heap size.
 
-* **JVM_OPTS**
+* **JVM_OPTS** / **JVM_XX_OPTS**
 
-  Additional -X options to pass to the JVM.
+  Additional space-separated options to pass to the JVM, where `JVM_XX_OPTS` will be added to the java command-line before `JVM_OPTS`.
 
 * **NETWORKADDRESS_CACHE_TTL**=60
 

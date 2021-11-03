@@ -340,7 +340,7 @@ if [[ ${INIT_MEMORY} || ${MAX_MEMORY} ]]; then
 fi
 
 if [ $UID == 0 ]; then
-  exec sudo -E -u bungeecord $JAVA_HOME/bin/java $JVM_OPTS -jar "$BUNGEE_JAR" "$@"
+  exec sudo -E -u bungeecord $JAVA_HOME/bin/java $JVM_XX_OPTS $JVM_OPTS -jar "$BUNGEE_JAR" "$@"
 else
   exec $JAVA_HOME/bin/java $JVM_OPTS -jar "$BUNGEE_JAR" "$@"
 fi
