@@ -11,6 +11,6 @@ services:
     environment:
       BUNGEE_JAR_REVISION: "1"
     ports:
-      - 25565:25577
+      - "25565:25577"
     volumes:
       - ./config.yml:/config/config.yml

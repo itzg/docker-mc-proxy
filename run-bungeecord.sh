@@ -260,33 +260,24 @@ else # Download orblazer/bungee-rcon plugin
 fi
 
 if [ -d /config ]; then
-    log "Copying BungeeCord configs over..."
-    cp -u /config/config.yml "$BUNGEE_HOME/config.yml"
+    log "Copying configs over..."
 
-    # Copy other files if avaliable
-    # server icon
-    if [ -f /config/server-icon.png ]; then
-      cp -u /config/server-icon.png "$BUNGEE_HOME/server-icon.png"
-    fi
-    # custom module list
-    if [ -f /config/modules.yml ]; then
-      cp -u /config/modules.yml "$BUNGEE_HOME/modules.yml"
-    fi
-    # Waterfall config
-    if [ -f /config/waterfall.yml ]; then
-      cp -u /config/waterfall.yml "$BUNGEE_HOME/waterfall.yml"
-    fi
-    # Velocity config
-    if [ -f /config/velocity.toml ]; then
-      cp -u /config/velocity.toml "$BUNGEE_HOME/velocity.toml"
-    fi
-    # Messages
-    if [ -f /config/messages.properties ]; then
-      cp -u /config/messages.properties "$BUNGEE_HOME/messages.properties"
-    fi
+    files=(
+      config.yml
+      server-icon.png
+      modules.yml
+      waterfall.yml
+      velocity.toml
+      messages.properties
+    )
+    for f in "${files[@]}"; do
+      if [ -f "/config/$f" ]; then
+        cp -u "/config/$f" "$BUNGEE_HOME/$f"
+      fi
+    done
 fi
 
-if [ -f /var/run/default-config.yml -a ! -f $BUNGEE_HOME/config.yml ]; then
+if [ -f /var/run/default-config.yml ] && [ ! -f $BUNGEE_HOME/config.yml ]; then
     log "Installing default configuration"
     cp /var/run/default-config.yml $BUNGEE_HOME/config.yml
     if [ $UID == 0 ]; then
