@@ -1,6 +1,7 @@
 #!/bin/bash
 
 : "${TYPE:=BUNGEECORD}"
+: "${DEBUG:=false}"
 : "${RCON_JAR_VERSION:=1.0.0}"
 : "${RCON_VELOCITY_JAR_VERSION:=1.0}"
 : "${SPIGET_PLUGINS:=}"
@@ -38,7 +39,7 @@ function isTrue() {
 }
 
 function isDebugging() {
-  if isTrue "${DEBUG:-false}"; then
+  if isTrue "${DEBUG}"; then
     return 0
   else
     return 1
@@ -111,7 +112,7 @@ function processConfigs {
   if [ -d /config ]; then
       log "Copying configs over..."
 
-      mc-image-helper --debug="${DEBUG:-false}" $subcommand \
+      mc-image-helper --debug="${DEBUG}" $subcommand \
         --skip-newer-in-destination="${SYNC_SKIP_NEWER_IN_DESTINATION}" \
         --replace-env-file-suffixes="${REPLACE_ENV_SUFFIXES}" \
         --replace-env-excludes="${REPLACE_ENV_VARIABLES_EXCLUDES}" \
@@ -131,32 +132,13 @@ function processConfigs {
   # Replace environment variables in config files
   if isTrue "${REPLACE_ENV_VARIABLES}"; then
     log "Replacing env variables in configs that match the prefix $REPLACE_ENV_VARIABLE_PREFIX..."
-    for name in $(compgen -v $REPLACE_ENV_VARIABLE_PREFIX); do
-      if [[ $name = *"_FILE" ]]; then
-        value=$(<${!name})
-        name="${name%_FILE}"
-      else
-        value=${!name}
-      fi
+    mc-image-helper --debug=${DEBUG} interpolate \
+      --replace-env-file-suffixes="${REPLACE_ENV_SUFFIXES}" \
+      --replace-env-excludes="${REPLACE_ENV_VARIABLES_EXCLUDES}" \
+      --replace-env-exclude-paths="${REPLACE_ENV_VARIABLES_EXCLUDE_PATHS}" \
+      --replace-env-prefix="${REPLACE_ENV_VARIABLE_PREFIX}" \
+      /server
 
-      log "Replacing $name ..."
-
-      value=${value//\\/\\\\}
-      value=${value//#/\\#}
-
-      if isDebugging; then
-        findDebug="-print"
-      fi
-
-      find /server/ \
-          $dirExcludes \
-          -type f \
-          \( -name "*.yml" -or -name "*.yaml" -or -name "*.toml" -or -name "*.txt" \
-            -or -name "*.cfg" -or -name "*.conf" -or -name "*.properties" -or -name "*.hjson" -or -name "*.json" \) \
-          $fileExcludes \
-          $findDebug \
-          -exec sed -i 's#${'"$name"'}#'"$value"'#g' {} \;
-    done
   fi
 }
 
