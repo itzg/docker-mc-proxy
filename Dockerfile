@@ -1,4 +1,4 @@
-FROM adoptopenjdk:16-jre-hotspot
+FROM eclipse-temurin:17-jre
 
 VOLUME ["/server"]
 WORKDIR /server
