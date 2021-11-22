@@ -19,7 +19,7 @@ jobs:
           stale-issue-message: >
             This issue is stale because it has been open 30 days with no activity. 
             Please add a comment describing the reason to keep this issue open.
-          days-before-stale: 30
+          days-before-stale: 120
           days-before-close: 5
           exempt-issue-labels: 'enhancement,keep,status/needs triage'
 
