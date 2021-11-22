@@ -3,12 +3,17 @@
 : "${TYPE:=BUNGEECORD}"
 : "${RCON_JAR_VERSION:=1.0.0}"
 : "${RCON_VELOCITY_JAR_VERSION:=1.0}"
-: "${ENV_VARIABLE_PREFIX:=CFG_}"
 : "${SPIGET_PLUGINS:=}"
 : "${NETWORKADDRESS_CACHE_TTL:=60}"
 : "${INIT_MEMORY:=${MEMORY}}"
 : "${MAX_MEMORY:=${MEMORY}}"
 : "${SYNC_SKIP_NEWER_IN_DESTINATION:=true}"
+: "${REPLACE_ENV_DURING_SYNC:=true}"
+: "${REPLACE_ENV_VARIABLES:=false}"
+: "${REPLACE_ENV_SUFFIXES:=yml,yaml,txt,cfg,conf,properties,hjson,json,tml,toml}"
+: "${REPLACE_ENV_VARIABLE_PREFIX:=${ENV_VARIABLE_PREFIX:-CFG_}}"
+: "${REPLACE_ENV_VARIABLES_EXCLUDES:=}"
+: "${REPLACE_ENV_VARIABLES_EXCLUDE_PATHS:=}"
 
 BUNGEE_HOME=/server
 RCON_JAR_URL=https://github.com/orblazer/bungee-rcon/releases/download/v${RCON_JAR_VERSION}/bungee-rcon-${RCON_JAR_VERSION}.jar
@@ -93,6 +98,65 @@ function getResourceFromSpiget() {
 function removeOldMods {
   if [ -d "$1" ]; then
     find "$1" -mindepth 1 -maxdepth "${REMOVE_OLD_MODS_DEPTH:-16}" -wholename "${REMOVE_OLD_MODS_INCLUDE:-*}" -not -wholename "${REMOVE_OLD_MODS_EXCLUDE:-}" -delete
+  fi
+}
+
+function processConfigs {
+  if isTrue ${REPLACE_ENV_DURING_SYNC}; then
+    subcommand=sync-and-interpolate
+  else
+    subcommand=sync
+  fi
+
+  if [ -d /config ]; then
+      log "Copying configs over..."
+
+      mc-image-helper --debug="${DEBUG:-false}" $subcommand \
+        --skip-newer-in-destination="${SYNC_SKIP_NEWER_IN_DESTINATION}" \
+        --replace-env-file-suffixes="${REPLACE_ENV_SUFFIXES}" \
+        --replace-env-excludes="${REPLACE_ENV_VARIABLES_EXCLUDES}" \
+        --replace-env-exclude-paths="${REPLACE_ENV_VARIABLES_EXCLUDE_PATHS}" \
+        --replace-env-prefix="${REPLACE_ENV_VARIABLE_PREFIX}" \
+        /config "$BUNGEE_HOME"
+  fi
+
+  if [ -f /var/run/default-config.yml ] && [ ! -f $BUNGEE_HOME/config.yml ]; then
+      log "Installing default configuration"
+      cp /var/run/default-config.yml $BUNGEE_HOME/config.yml
+      if [ $UID == 0 ]; then
+          chown bungeecord: $BUNGEE_HOME/config.yml
+      fi
+  fi
+
+  # Replace environment variables in config files
+  if isTrue "${REPLACE_ENV_VARIABLES}"; then
+    log "Replacing env variables in configs that match the prefix $REPLACE_ENV_VARIABLE_PREFIX..."
+    for name in $(compgen -v $REPLACE_ENV_VARIABLE_PREFIX); do
+      if [[ $name = *"_FILE" ]]; then
+        value=$(<${!name})
+        name="${name%_FILE}"
+      else
+        value=${!name}
+      fi
+
+      log "Replacing $name ..."
+
+      value=${value//\\/\\\\}
+      value=${value//#/\\#}
+
+      if isDebugging; then
+        findDebug="-print"
+      fi
+
+      find /server/ \
+          $dirExcludes \
+          -type f \
+          \( -name "*.yml" -or -name "*.yaml" -or -name "*.toml" -or -name "*.txt" \
+            -or -name "*.cfg" -or -name "*.conf" -or -name "*.properties" -or -name "*.hjson" -or -name "*.json" \) \
+          $fileExcludes \
+          $findDebug \
+          -exec sed -i 's#${'"$name"'}#'"$value"'#g' {} \;
+    done
   fi
 }
 
@@ -260,53 +324,7 @@ else # Download orblazer/bungee-rcon plugin
   fi
 fi
 
-if [ -d /config ]; then
-    log "Copying configs over..."
-
-    mc-image-helper sync \
-      --debug="${DEBUG:-false}" \
-      --skip-newer-in-destination="${SYNC_SKIP_NEWER_IN_DESTINATION}" \
-      /config "$BUNGEE_HOME"
-fi
-
-if [ -f /var/run/default-config.yml ] && [ ! -f $BUNGEE_HOME/config.yml ]; then
-    log "Installing default configuration"
-    cp /var/run/default-config.yml $BUNGEE_HOME/config.yml
-    if [ $UID == 0 ]; then
-        chown bungeecord: $BUNGEE_HOME/config.yml
-    fi
-fi
-
-# Replace environment variables in config files
-if isTrue "${REPLACE_ENV_VARIABLES}"; then
-  log "Replacing env variables in configs that match the prefix $ENV_VARIABLE_PREFIX..."
-  for name in $(compgen -v $ENV_VARIABLE_PREFIX); do
-    if [[ $name = *"_FILE" ]]; then
-      value=$(<${!name})
-      name="${name%_FILE}"
-    else
-      value=${!name}
-    fi
-
-    log "Replacing $name ..."
-
-    value=${value//\\/\\\\}
-    value=${value//#/\\#}
-
-    if isDebugging; then
-      findDebug="-print"
-    fi
-
-    find /server/ \
-        $dirExcludes \
-        -type f \
-        \( -name "*.yml" -or -name "*.yaml" -or -name "*.toml" -or -name "*.txt" \
-          -or -name "*.cfg" -or -name "*.conf" -or -name "*.properties" -or -name "*.hjson" -or -name "*.json" \) \
-        $fileExcludes \
-        $findDebug \
-        -exec sed -i 's#${'"$name"'}#'"$value"'#g' {} \;
-  done
-fi
+processConfigs
 
 if [ $UID == 0 ]; then
   chown -R bungeecord:bungeecord $BUNGEE_HOME

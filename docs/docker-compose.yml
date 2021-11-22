@@ -10,6 +10,7 @@ services:
     image: itzg/bungeecord
     environment:
       BUNGEE_JAR_REVISION: "1"
+      CFG_MOTD: Powered by Docker
     ports:
       - "25565:25577"
     volumes:
