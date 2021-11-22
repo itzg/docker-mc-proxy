@@ -14,3 +14,7 @@ services:
       - "25565:25577"
     volumes:
       - ./config.yml:/config/config.yml
+      - bungeecord:/server
+
+volumes:
+  bungeecord: {}

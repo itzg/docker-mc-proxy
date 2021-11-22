@@ -8,6 +8,7 @@
 : "${NETWORKADDRESS_CACHE_TTL:=60}"
 : "${INIT_MEMORY:=${MEMORY}}"
 : "${MAX_MEMORY:=${MEMORY}}"
+: "${SYNC_SKIP_NEWER_IN_DESTINATION:=true}"
 
 BUNGEE_HOME=/server
 RCON_JAR_URL=https://github.com/orblazer/bungee-rcon/releases/download/v${RCON_JAR_VERSION}/bungee-rcon-${RCON_JAR_VERSION}.jar
@@ -91,7 +92,7 @@ function getResourceFromSpiget() {
 
 function removeOldMods {
   if [ -d "$1" ]; then
-    find "$1" -mindepth 1 -maxdepth ${REMOVE_OLD_MODS_DEPTH:-16} -wholename "${REMOVE_OLD_MODS_INCLUDE:-*}" -not -wholename "${REMOVE_OLD_MODS_EXCLUDE:-}" -delete
+    find "$1" -mindepth 1 -maxdepth "${REMOVE_OLD_MODS_DEPTH:-16}" -wholename "${REMOVE_OLD_MODS_INCLUDE:-*}" -not -wholename "${REMOVE_OLD_MODS_EXCLUDE:-}" -delete
   fi
 }
 
@@ -100,22 +101,22 @@ handleDebugMode
 log "Resolving type given ${TYPE}"
 case "${TYPE^^}" in
   BUNGEECORD)
-    : ${BUNGEE_BASE_URL:=https://ci.md-5.net/job/BungeeCord}
-    : ${BUNGEE_JOB_ID:=lastStableBuild}
-    : ${BUNGEE_JAR_URL:=${BUNGEE_BASE_URL}/${BUNGEE_JOB_ID}/artifact/bootstrap/target/BungeeCord.jar}
-    : ${BUNGEE_JAR_REVISION:=${BUNGEE_JOB_ID}}
+    : "${BUNGEE_BASE_URL:=https://ci.md-5.net/job/BungeeCord}"
+    : "${BUNGEE_JOB_ID:=lastStableBuild}"
+    : "${BUNGEE_JAR_URL:=${BUNGEE_BASE_URL}/${BUNGEE_JOB_ID}/artifact/bootstrap/target/BungeeCord.jar}"
+    : "${BUNGEE_JAR_REVISION:=${BUNGEE_JOB_ID}}"
     BUNGEE_JAR=$BUNGEE_HOME/${BUNGEE_JAR:=BungeeCord-${BUNGEE_JAR_REVISION}.jar}
   ;;
 
   WATERFALL)
     # Doc : https://papermc.io/api
-    : ${WATERFALL_VERSION:=latest}
-    : ${WATERFALL_BUILD_ID:=latest}
+    : "${WATERFALL_VERSION:=latest}"
+    : "${WATERFALL_BUILD_ID:=latest}"
 
     # Retrieve waterfall version
     if [[ ${WATERFALL_VERSION^^} = LATEST ]]; then
       WATERFALL_VERSION=$(curl -fsSL "https://papermc.io/api/v2/projects/waterfall" -H "accept: application/json" | jq -r '.versions[-1]')
-      if [ -z $WATERFALL_VERSION ]; then
+      if [ -z "$WATERFALL_VERSION" ]; then
         echo "ERROR: failed to lookup PaperMC versions"
         exit 1
       fi
@@ -143,7 +144,7 @@ case "${TYPE^^}" in
   ;;
 
   VELOCITY)
-    : ${VELOCITY_VERSION:=latest}
+    : "${VELOCITY_VERSION:=latest}"
     BUNGEE_JAR_URL="https://versions.velocitypowered.com/download/${VELOCITY_VERSION}.jar"
     BUNGEE_JAR=$BUNGEE_HOME/Velocity-${VELOCITY_VERSION}.jar
   ;;
@@ -262,19 +263,10 @@ fi
 if [ -d /config ]; then
     log "Copying configs over..."
 
-    files=(
-      config.yml
-      server-icon.png
-      modules.yml
-      waterfall.yml
-      velocity.toml
-      messages.properties
-    )
-    for f in "${files[@]}"; do
-      if [ -f "/config/$f" ]; then
-        cp -u "/config/$f" "$BUNGEE_HOME/$f"
-      fi
-    done
+    mc-image-helper sync \
+      --debug="${DEBUG:-false}" \
+      --skip-newer-in-destination="${SYNC_SKIP_NEWER_IN_DESTINATION}" \
+      /config "$BUNGEE_HOME"
 fi
 
 if [ -f /var/run/default-config.yml ] && [ ! -f $BUNGEE_HOME/config.yml ]; then
