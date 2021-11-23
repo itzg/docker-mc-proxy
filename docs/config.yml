@@ -8,7 +8,7 @@ servers:
   lobby:
     address: mc:25565
     restricted: false
-    motd: '&1Just another BungeeCord - Forced Host'
+    motd: '${CFG_MOTD}'
 remote_ping_cache: -1
 connection_throttle_limit: 3
 online_mode: true
@@ -21,7 +21,7 @@ log_pings: true
 log_commands: false
 stats: 19659f49-ed6b-47e3-8b81-63bd14ade63a
 listeners:
-- motd: '&1Another Bungee server'
+- motd: '${CFG_MOTD}'
   priorities:
   - lobby
   host: 0.0.0.0:25577
