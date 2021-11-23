@@ -57,6 +57,14 @@ function log() {
   echo "[init] $*"
 }
 
+function get() {
+  local flags=()
+  if isTrue "${DEBUG_GET:-false}"; then
+    flags+=("--debug")
+  fi
+  mc-image-helper "${flags[@]}" get "$@"
+}
+
 function containsJars() {
   file=${1?}
 
@@ -161,8 +169,7 @@ case "${TYPE^^}" in
 
     # Retrieve waterfall version
     if [[ ${WATERFALL_VERSION^^} = LATEST ]]; then
-      WATERFALL_VERSION=$(curl -fsSL "https://papermc.io/api/v2/projects/waterfall" -H "accept: application/json" | jq -r '.versions[-1]')
-      if [ -z "$WATERFALL_VERSION" ]; then
+      if ! WATERFALL_VERSION=$(get --json-path=".versions[-1]" "https://papermc.io/api/v2/projects/waterfall"); then
         echo "ERROR: failed to lookup PaperMC versions"
         exit 1
       fi
@@ -170,17 +177,14 @@ case "${TYPE^^}" in
 
     # Retrieve waterfall build
     if [[ ${WATERFALL_BUILD_ID^^} = LATEST ]]; then
-      WATERFALL_BUILD_ID=$(curl -fsSL "https://papermc.io/api/v2/projects/waterfall/versions/${WATERFALL_VERSION}" -H  "accept: application/json" \
-        | jq '.builds[-1]')
-      if [ -z $WATERFALL_BUILD_ID ]; then
+      if ! WATERFALL_BUILD_ID=$(get --json-path=".builds[-1]" "https://papermc.io/api/v2/projects/waterfall/versions/${WATERFALL_VERSION}"); then
           echo "ERROR: failed to lookup PaperMC build from version ${WATERFALL_VERSION}"
           exit 1
       fi
     fi
 
-    WATERFALL_JAR=$(curl -fsSL "https://papermc.io/api/v2/projects/waterfall/versions/${WATERFALL_VERSION}/builds/${WATERFALL_BUILD_ID}" \
-      -H  "accept: application/json" | jq -r '.downloads.application.name')
-    if [ -z $WATERFALL_JAR ]; then
+
+    if ! WATERFALL_JAR=$(get --json-path=".downloads.application.name" "https://papermc.io/api/v2/projects/waterfall/versions/${WATERFALL_VERSION}/builds/${WATERFALL_BUILD_ID}"); then
       echo "ERROR: failed to lookup PaperMC download file from version=${WATERFALL_VERSION} build=${WATERFALL_BUILD_ID}"
       exit 1
     fi
@@ -216,11 +220,8 @@ case "${TYPE^^}" in
 esac
 
 if isTrue "$download_required"; then
-  if [ -f "$BUNGEE_JAR" ]; then
-    zarg=(-z "$BUNGEE_JAR")
-  fi
   log "Downloading ${BUNGEE_JAR_URL}"
-  if ! curl -o "$BUNGEE_JAR" "${zarg[@]}" -fsSL "$BUNGEE_JAR_URL"; then
+  if ! get -o "$BUNGEE_JAR" --skip-up-to-date --log-progress-each "$BUNGEE_JAR_URL"; then
       echo "ERROR: failed to download" >&2
       exit 2
   fi
@@ -233,31 +234,15 @@ fi
 
 # If supplied with a URL for a plugin download it.
 if [[ "$PLUGINS" ]]; then
-for i in ${PLUGINS//,/ }
-do
-  EFFECTIVE_PLUGIN_URL=$(curl -Ls -o /dev/null -w %{url_effective} $i)
-  case "X$EFFECTIVE_PLUGIN_URL" in
-    X[Hh][Tt][Tt][Pp]*.jar)
-      log "Downloading plugin via HTTP"
-      log "  from $EFFECTIVE_PLUGIN_URL ..."
-      if ! curl -sSL -o /tmp/${EFFECTIVE_PLUGIN_URL##*/} $EFFECTIVE_PLUGIN_URL; then
-        echo "ERROR: failed to download from $EFFECTIVE_PLUGIN_URL to /tmp/${EFFECTIVE_PLUGIN_URL##*/}"
-        exit 2
-      fi
-
-      mkdir -p $BUNGEE_HOME/plugins
-      mv /tmp/${EFFECTIVE_PLUGIN_URL##*/} "$BUNGEE_HOME/plugins/${EFFECTIVE_PLUGIN_URL##*/}"
-      rm -f /tmp/${EFFECTIVE_PLUGIN_URL##*/}
-      ;;
-    *)
-      echo "ERROR: Invalid URL given for plugin list: Must be HTTP or HTTPS and a JAR file"
-      ;;
-  esac
-done
+  mkdir -p "$BUNGEE_HOME/plugins"
+  if ! get --skip-existing -o "$BUNGEE_HOME/plugins" "$PLUGINS"; then
+    echo "ERROR: failed to download plugin(s)"
+    exit 1
+  fi
 fi
 
 if [[ ${SPIGET_PLUGINS} ]]; then
-  if isTrue ${REMOVE_OLD_PLUGINS:-false}; then
+  if isTrue "${REMOVE_OLD_PLUGINS:-false}"; then
     removeOldMods $BUNGEE_HOME/plugins
     REMOVE_OLD_PLUGINS=false
   fi
@@ -271,21 +256,19 @@ fi
 
 # Download rcon plugin
 if [ "${TYPE^^}" = "VELOCITY" ]; then # Download UnioDex/VelocityRcon plugin
-  if isTrue "${ENABLE_RCON}" && [[ ! -e $BUNGEE_HOME/plugins/${RCON_VELOCITY_JAR_URL##*/} ]]; then
+  if isTrue "${ENABLE_RCON}"; then
     log "Downloading Velocity rcon plugin"
-    mkdir -p $BUNGEE_HOME/plugins/velocityrcon
 
-    if ! curl -sSL -o "$BUNGEE_HOME/plugins/${RCON_VELOCITY_JAR_URL##*/}" $RCON_VELOCITY_JAR_URL; then
-      echo "ERROR: failed to download from $RCON_VELOCITY_JAR_URL to /tmp/${RCON_VELOCITY_JAR_URL##*/}"
-      exit 2
+    mkdir -p "$BUNGEE_HOME/plugins"
+    if ! get -o "$BUNGEE_HOME/plugins" --skip-up-to-date --log-progress-each "$RCON_VELOCITY_JAR_URL"; then
+      echo "ERROR: failed to download from $RCON_VELOCITY_JAR_URL"
+      exit 1
     fi
 
     log "Copy Velocity rcon configuration"
-    sed -i 's#${PORT}#'"$RCON_PORT"'#g' /templates/rcon-velocity-config.toml
-    sed -i 's#${PASSWORD}#'"$RCON_PASSWORD"'#g' /templates/rcon-velocity-config.toml
-
-    mv /templates/rcon-velocity-config.toml "$BUNGEE_HOME/plugins/velocityrcon/rcon.toml"
-    rm -f /templates/rcon-velocity-config.toml
+    mkdir -p $BUNGEE_HOME/plugins/velocityrcon
+    sed -e 's#${PORT}#'"$RCON_PORT"'#g' -e 's#${PASSWORD}#'"$RCON_PASSWORD"'#g' \
+      /templates/rcon-velocity-config.toml > "$BUNGEE_HOME/plugins/velocityrcon/rcon.toml"
   fi
 else # Download orblazer/bungee-rcon plugin
   if isTrue "${ENABLE_RCON}" && [[ ! -e $BUNGEE_HOME/plugins/${RCON_JAR_URL##*/} ]]; then
