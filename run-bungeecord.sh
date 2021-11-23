@@ -1,11 +1,21 @@
 #!/bin/bash
 
-: ${TYPE:=BUNGEECORD}
-: ${MEMORY:=512m}
-: ${RCON_JAR_VERSION:=1.0.0}
-: ${RCON_VELOCITY_JAR_VERSION:=1.0}
-: ${ENV_VARIABLE_PREFIX:=CFG_}
-: ${SPIGET_PLUGINS:=}
+: "${TYPE:=BUNGEECORD}"
+: "${DEBUG:=false}"
+: "${RCON_JAR_VERSION:=1.0.0}"
+: "${RCON_VELOCITY_JAR_VERSION:=1.0}"
+: "${SPIGET_PLUGINS:=}"
+: "${NETWORKADDRESS_CACHE_TTL:=60}"
+: "${INIT_MEMORY:=${MEMORY}}"
+: "${MAX_MEMORY:=${MEMORY}}"
+: "${SYNC_SKIP_NEWER_IN_DESTINATION:=true}"
+: "${REPLACE_ENV_DURING_SYNC:=true}"
+: "${REPLACE_ENV_VARIABLES:=false}"
+: "${REPLACE_ENV_SUFFIXES:=yml,yaml,txt,cfg,conf,properties,hjson,json,tml,toml}"
+: "${REPLACE_ENV_VARIABLE_PREFIX:=${ENV_VARIABLE_PREFIX:-CFG_}}"
+: "${REPLACE_ENV_VARIABLES_EXCLUDES:=}"
+: "${REPLACE_ENV_VARIABLES_EXCLUDE_PATHS:=}"
+
 BUNGEE_HOME=/server
 RCON_JAR_URL=https://github.com/orblazer/bungee-rcon/releases/download/v${RCON_JAR_VERSION}/bungee-rcon-${RCON_JAR_VERSION}.jar
 RCON_VELOCITY_JAR_URL=https://github.com/UnioDex/VelocityRcon/releases/download/v${RCON_VELOCITY_JAR_VERSION}/VelocityRcon.jar
@@ -29,7 +39,7 @@ function isTrue() {
 }
 
 function isDebugging() {
-  if isTrue "${DEBUG:-false}"; then
+  if isTrue "${DEBUG}"; then
     return 0
   else
     return 1
@@ -56,7 +66,7 @@ function containsJars() {
     if [[ $line =~ $pat ]]; then
       return 0
     fi
-  done <<<$(unzip -l "$file")
+  done <<<"$(unzip -l "$file")"
 
   return 1
 }
@@ -88,7 +98,47 @@ function getResourceFromSpiget() {
 
 function removeOldMods {
   if [ -d "$1" ]; then
-    find "$1" -mindepth 1 -maxdepth ${REMOVE_OLD_MODS_DEPTH:-16} -wholename "${REMOVE_OLD_MODS_INCLUDE:-*}" -not -wholename "${REMOVE_OLD_MODS_EXCLUDE:-}" -delete
+    find "$1" -mindepth 1 -maxdepth "${REMOVE_OLD_MODS_DEPTH:-16}" -wholename "${REMOVE_OLD_MODS_INCLUDE:-*}" -not -wholename "${REMOVE_OLD_MODS_EXCLUDE:-}" -delete
+  fi
+}
+
+function processConfigs {
+  if isTrue ${REPLACE_ENV_DURING_SYNC}; then
+    subcommand=sync-and-interpolate
+  else
+    subcommand=sync
+  fi
+
+  if [ -d /config ]; then
+      log "Copying configs over..."
+
+      mc-image-helper --debug="${DEBUG}" $subcommand \
+        --skip-newer-in-destination="${SYNC_SKIP_NEWER_IN_DESTINATION}" \
+        --replace-env-file-suffixes="${REPLACE_ENV_SUFFIXES}" \
+        --replace-env-excludes="${REPLACE_ENV_VARIABLES_EXCLUDES}" \
+        --replace-env-exclude-paths="${REPLACE_ENV_VARIABLES_EXCLUDE_PATHS}" \
+        --replace-env-prefix="${REPLACE_ENV_VARIABLE_PREFIX}" \
+        /config "$BUNGEE_HOME"
+  fi
+
+  if [ -f /var/run/default-config.yml ] && [ ! -f $BUNGEE_HOME/config.yml ]; then
+      log "Installing default configuration"
+      cp /var/run/default-config.yml $BUNGEE_HOME/config.yml
+      if [ $UID == 0 ]; then
+          chown bungeecord: $BUNGEE_HOME/config.yml
+      fi
+  fi
+
+  # Replace environment variables in config files
+  if isTrue "${REPLACE_ENV_VARIABLES}"; then
+    log "Replacing env variables in configs that match the prefix $REPLACE_ENV_VARIABLE_PREFIX..."
+    mc-image-helper --debug=${DEBUG} interpolate \
+      --replace-env-file-suffixes="${REPLACE_ENV_SUFFIXES}" \
+      --replace-env-excludes="${REPLACE_ENV_VARIABLES_EXCLUDES}" \
+      --replace-env-exclude-paths="${REPLACE_ENV_VARIABLES_EXCLUDE_PATHS}" \
+      --replace-env-prefix="${REPLACE_ENV_VARIABLE_PREFIX}" \
+      /server
+
   fi
 }
 
@@ -97,22 +147,22 @@ handleDebugMode
 log "Resolving type given ${TYPE}"
 case "${TYPE^^}" in
   BUNGEECORD)
-    : ${BUNGEE_BASE_URL:=https://ci.md-5.net/job/BungeeCord}
-    : ${BUNGEE_JOB_ID:=lastStableBuild}
-    : ${BUNGEE_JAR_URL:=${BUNGEE_BASE_URL}/${BUNGEE_JOB_ID}/artifact/bootstrap/target/BungeeCord.jar}
-    : ${BUNGEE_JAR_REVISION:=${BUNGEE_JOB_ID}}
+    : "${BUNGEE_BASE_URL:=https://ci.md-5.net/job/BungeeCord}"
+    : "${BUNGEE_JOB_ID:=lastStableBuild}"
+    : "${BUNGEE_JAR_URL:=${BUNGEE_BASE_URL}/${BUNGEE_JOB_ID}/artifact/bootstrap/target/BungeeCord.jar}"
+    : "${BUNGEE_JAR_REVISION:=${BUNGEE_JOB_ID}}"
     BUNGEE_JAR=$BUNGEE_HOME/${BUNGEE_JAR:=BungeeCord-${BUNGEE_JAR_REVISION}.jar}
   ;;
 
   WATERFALL)
     # Doc : https://papermc.io/api
-    : ${WATERFALL_VERSION:=latest}
-    : ${WATERFALL_BUILD_ID:=latest}
+    : "${WATERFALL_VERSION:=latest}"
+    : "${WATERFALL_BUILD_ID:=latest}"
 
     # Retrieve waterfall version
     if [[ ${WATERFALL_VERSION^^} = LATEST ]]; then
       WATERFALL_VERSION=$(curl -fsSL "https://papermc.io/api/v2/projects/waterfall" -H "accept: application/json" | jq -r '.versions[-1]')
-      if [ -z $WATERFALL_VERSION ]; then
+      if [ -z "$WATERFALL_VERSION" ]; then
         echo "ERROR: failed to lookup PaperMC versions"
         exit 1
       fi
@@ -140,7 +190,7 @@ case "${TYPE^^}" in
   ;;
 
   VELOCITY)
-    : ${VELOCITY_VERSION:=latest}
+    : "${VELOCITY_VERSION:=latest}"
     BUNGEE_JAR_URL="https://versions.velocitypowered.com/download/${VELOCITY_VERSION}.jar"
     BUNGEE_JAR=$BUNGEE_HOME/Velocity-${VELOCITY_VERSION}.jar
   ;;
@@ -167,10 +217,10 @@ esac
 
 if isTrue "$download_required"; then
   if [ -f "$BUNGEE_JAR" ]; then
-    zarg="-z '$BUNGEE_JAR'"
+    zarg=(-z "$BUNGEE_JAR")
   fi
   log "Downloading ${BUNGEE_JAR_URL}"
-  if ! curl -o "$BUNGEE_JAR" $zarg -fsSL "$BUNGEE_JAR_URL"; then
+  if ! curl -o "$BUNGEE_JAR" "${zarg[@]}" -fsSL "$BUNGEE_JAR_URL"; then
       echo "ERROR: failed to download" >&2
       exit 2
   fi
@@ -256,81 +306,24 @@ else # Download orblazer/bungee-rcon plugin
   fi
 fi
 
-if [ -d /config ]; then
-    log "Copying BungeeCord configs over..."
-    cp -u /config/config.yml "$BUNGEE_HOME/config.yml"
-
-    # Copy other files if avaliable
-    # server icon
-    if [ -f /config/server-icon.png ]; then
-      cp -u /config/server-icon.png "$BUNGEE_HOME/server-icon.png"
-    fi
-    # custom module list
-    if [ -f /config/modules.yml ]; then
-      cp -u /config/modules.yml "$BUNGEE_HOME/modules.yml"
-    fi
-    # Waterfall config
-    if [ -f /config/waterfall.yml ]; then
-      cp -u /config/waterfall.yml "$BUNGEE_HOME/waterfall.yml"
-    fi
-    # Velocity config
-    if [ -f /config/velocity.toml ]; then
-      cp -u /config/velocity.toml "$BUNGEE_HOME/velocity.toml"
-    fi
-    # Messages
-    if [ -f /config/messages.properties ]; then
-      cp -u /config/messages.properties "$BUNGEE_HOME/messages.properties"
-    fi
-fi
-
-if [ -f /var/run/default-config.yml -a ! -f $BUNGEE_HOME/config.yml ]; then
-    log "Installing default configuration"
-    cp /var/run/default-config.yml $BUNGEE_HOME/config.yml
-    if [ $UID == 0 ]; then
-        chown bungeecord: $BUNGEE_HOME/config.yml
-    fi
-fi
-
-# Replace environment variables in config files
-if isTrue "${REPLACE_ENV_VARIABLES}"; then
-  log "Replacing env variables in configs that match the prefix $ENV_VARIABLE_PREFIX..."
-  for name in $(compgen -v $ENV_VARIABLE_PREFIX); do
-    if [[ $name = *"_FILE" ]]; then
-      value=$(<${!name})
-      name="${name%_FILE}"
-    else
-      value=${!name}
-    fi
-
-    log "Replacing $name ..."
-
-    value=${value//\\/\\\\}
-    value=${value//#/\\#}
-
-    if isDebugging; then
-      findDebug="-print"
-    fi
-
-    find /server/ \
-        $dirExcludes \
-        -type f \
-        \( -name "*.yml" -or -name "*.yaml" -or -name "*.toml" -or -name "*.txt" \
-          -or -name "*.cfg" -or -name "*.conf" -or -name "*.properties" -or -name "*.hjson" -or -name "*.json" \) \
-        $fileExcludes \
-        $findDebug \
-        -exec sed -i 's#${'"$name"'}#'"$value"'#g' {} \;
-  done
-fi
+processConfigs
 
 if [ $UID == 0 ]; then
   chown -R bungeecord:bungeecord $BUNGEE_HOME
 fi
 
-log "Setting initial memory to ${INIT_MEMORY:-${MEMORY}} and max to ${MAX_MEMORY:-${MEMORY}}"
-JVM_OPTS="-Xms${INIT_MEMORY:-${MEMORY}} -Xmx${MAX_MEMORY:-${MEMORY}} ${JVM_OPTS}"
+if [[ ${INIT_MEMORY} || ${MAX_MEMORY} ]]; then
+  log "Setting initial memory to ${INIT_MEMORY:=${MEMORY}} and max to ${MAX_MEMORY:=${MEMORY}}"
+  if [[ ${INIT_MEMORY} ]]; then
+    JVM_OPTS="-Xms${INIT_MEMORY} ${JVM_OPTS}"
+  fi
+  if [[ ${MAX_MEMORY} ]]; then
+    JVM_OPTS="-Xmx${MAX_MEMORY} ${JVM_OPTS}"
+  fi
+fi
 
 if [ $UID == 0 ]; then
-  exec sudo -E -u bungeecord $JAVA_HOME/bin/java $JVM_OPTS -jar "$BUNGEE_JAR" "$@"
+  exec sudo -E -u bungeecord $JAVA_HOME/bin/java $JVM_XX_OPTS $JVM_OPTS -jar "$BUNGEE_JAR" "$@"
 else
   exec $JAVA_HOME/bin/java $JVM_OPTS -jar "$BUNGEE_JAR" "$@"
 fi
