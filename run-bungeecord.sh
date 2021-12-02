@@ -150,6 +150,39 @@ function processConfigs {
   fi
 }
 
+function getFromPaperMc() {
+  local project=${1?}
+  local version=${2?}
+  local buildId=${3?}
+
+  # Doc : https://papermc.io/api
+
+  if [[ ${version^^} = LATEST ]]; then
+    if ! version=$(get --json-path=".versions[-1]" "https://papermc.io/api/v2/projects/${project}"); then
+      echo "ERROR: failed to lookup PaperMC versions"
+      exit 1
+    fi
+  fi
+
+  if [[ ${buildId^^} = LATEST ]]; then
+    if ! buildId=$(get --json-path=".builds[-1]" "https://papermc.io/api/v2/projects/${project}/versions/${version}"); then
+        echo "ERROR: failed to lookup PaperMC build from version ${version}"
+        exit 1
+    fi
+  fi
+
+
+  if ! jar=$(get --json-path=".downloads.application.name" "https://papermc.io/api/v2/projects/${project}/versions/${version}/builds/${buildId}"); then
+    echo "ERROR: failed to lookup PaperMC download file from version=${version} build=${buildId}"
+    exit 1
+  fi
+
+  BUNGEE_JAR_URL="https://papermc.io/api/v2/projects/${project}/versions/${version}/builds/${buildId}/downloads/${jar}"
+  BUNGEE_JAR=$BUNGEE_HOME/${BUNGEE_JAR:=${project}-${version}-${buildId}.jar}
+}
+
+### MAIN
+
 handleDebugMode
 
 log "Resolving type given ${TYPE}"
@@ -163,40 +196,11 @@ case "${TYPE^^}" in
   ;;
 
   WATERFALL)
-    # Doc : https://papermc.io/api
-    : "${WATERFALL_VERSION:=latest}"
-    : "${WATERFALL_BUILD_ID:=latest}"
-
-    # Retrieve waterfall version
-    if [[ ${WATERFALL_VERSION^^} = LATEST ]]; then
-      if ! WATERFALL_VERSION=$(get --json-path=".versions[-1]" "https://papermc.io/api/v2/projects/waterfall"); then
-        echo "ERROR: failed to lookup PaperMC versions"
-        exit 1
-      fi
-    fi
-
-    # Retrieve waterfall build
-    if [[ ${WATERFALL_BUILD_ID^^} = LATEST ]]; then
-      if ! WATERFALL_BUILD_ID=$(get --json-path=".builds[-1]" "https://papermc.io/api/v2/projects/waterfall/versions/${WATERFALL_VERSION}"); then
-          echo "ERROR: failed to lookup PaperMC build from version ${WATERFALL_VERSION}"
-          exit 1
-      fi
-    fi
-
-
-    if ! WATERFALL_JAR=$(get --json-path=".downloads.application.name" "https://papermc.io/api/v2/projects/waterfall/versions/${WATERFALL_VERSION}/builds/${WATERFALL_BUILD_ID}"); then
-      echo "ERROR: failed to lookup PaperMC download file from version=${WATERFALL_VERSION} build=${WATERFALL_BUILD_ID}"
-      exit 1
-    fi
-
-    BUNGEE_JAR_URL="https://papermc.io/api/v2/projects/waterfall/versions/${WATERFALL_VERSION}/builds/${WATERFALL_BUILD_ID}/downloads/${WATERFALL_JAR}"
-    BUNGEE_JAR=$BUNGEE_HOME/${BUNGEE_JAR:=Waterfall-${WATERFALL_VERSION}-${WATERFALL_BUILD_ID}.jar}
+    getFromPaperMc waterfall "${WATERFALL_VERSION:-latest}" "${WATERFALL_BUILD_ID:-latest}"
   ;;
 
   VELOCITY)
-    : "${VELOCITY_VERSION:=latest}"
-    BUNGEE_JAR_URL="https://versions.velocitypowered.com/download/${VELOCITY_VERSION}.jar"
-    BUNGEE_JAR=$BUNGEE_HOME/Velocity-${VELOCITY_VERSION}.jar
+    getFromPaperMc velocity "${VELOCITY_VERSION:-latest}" "${VELOCITY_BUILD_ID:-latest}"
   ;;
 
   CUSTOM)

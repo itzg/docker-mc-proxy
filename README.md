@@ -146,6 +146,10 @@ healthy
 
   For `TYPE=VELOCITY`, specifies the version of Velocity to download and run.
 
+* **VELOCITY_BUILD_ID**=latest
+
+  For `TYPE=VELOCITY`, allows downloading a specific build of Waterfall within the given version.
+
 * **HEALTH_HOST**=localhost
 
   Allows for configuring the host contacted for container health check.
