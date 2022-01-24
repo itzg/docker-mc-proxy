@@ -248,7 +248,7 @@ with environment variables defined at container runtime.
 
 If you set the environment variable `REPLACE_ENV_VARIABLES` to `TRUE` the startup script will go through all files inside your `/server` volume and replace variables that match your defined environment variables. Variables that you want to replace need to be declared as `${YOUR_VARIABLE}`, which is common with shell scripting languages.
 
-With `REPLACE_ENV_VARIABLE_PREFIX` you can also define a prefix to only match predefined environment variables where the default is `CFG_`.
+With `REPLACE_ENV_VARIABLE_PREFIX` you can define a prefix, where the default is `CFG_`, to only match predefined environment variables.
 
 If you want to use a file for a value (such as when using Docker secrets) you can add suffix `_FILE` to your variable name (in  run command). For example, `${CFG_PASSWORD_FILE}` would be replaced with the contents of the file specified by the `CFG_PASSWORD_FILE` environment variable.
 
