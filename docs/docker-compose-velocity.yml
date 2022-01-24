@@ -6,12 +6,17 @@ services:
     environment:
       EULA: "TRUE"
       ONLINE_MODE: "FALSE"
-  bungeecord:
+  proxy:
     image: itzg/bungeecord
     environment:
-      TYPE: WATERFALL
+      TYPE: VELOCITY
       DEBUG: "false"
+      ENABLE_RCON: "true"
     ports:
-      - 25565:25577
+      - "25565:25577"
     volumes:
       - ./config.yml:/config/config.yml
+      - proxy:/server
+
+volumes:
+  proxy: {}

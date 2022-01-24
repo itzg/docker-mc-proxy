@@ -3,7 +3,7 @@
 : "${TYPE:=BUNGEECORD}"
 : "${DEBUG:=false}"
 : "${RCON_JAR_VERSION:=1.0.0}"
-: "${RCON_VELOCITY_JAR_VERSION:=1.0}"
+: "${RCON_VELOCITY_JAR_VERSION:=1.1}"
 : "${SPIGET_PLUGINS:=}"
 : "${NETWORKADDRESS_CACHE_TTL:=60}"
 : "${INIT_MEMORY:=${MEMORY}}"
@@ -55,6 +55,14 @@ function handleDebugMode() {
 
 function log() {
   echo "[init] $*"
+}
+
+function get() {
+  local flags=()
+  if isTrue "${DEBUG_GET:-false}"; then
+    flags+=("--debug")
+  fi
+  mc-image-helper "${flags[@]}" get "$@"
 }
 
 function containsJars() {
@@ -142,6 +150,39 @@ function processConfigs {
   fi
 }
 
+function getFromPaperMc() {
+  local project=${1?}
+  local version=${2?}
+  local buildId=${3?}
+
+  # Doc : https://papermc.io/api
+
+  if [[ ${version^^} = LATEST ]]; then
+    if ! version=$(get --json-path=".versions[-1]" "https://papermc.io/api/v2/projects/${project}"); then
+      echo "ERROR: failed to lookup PaperMC versions"
+      exit 1
+    fi
+  fi
+
+  if [[ ${buildId^^} = LATEST ]]; then
+    if ! buildId=$(get --json-path=".builds[-1]" "https://papermc.io/api/v2/projects/${project}/versions/${version}"); then
+        echo "ERROR: failed to lookup PaperMC build from version ${version}"
+        exit 1
+    fi
+  fi
+
+
+  if ! jar=$(get --json-path=".downloads.application.name" "https://papermc.io/api/v2/projects/${project}/versions/${version}/builds/${buildId}"); then
+    echo "ERROR: failed to lookup PaperMC download file from version=${version} build=${buildId}"
+    exit 1
+  fi
+
+  BUNGEE_JAR_URL="https://papermc.io/api/v2/projects/${project}/versions/${version}/builds/${buildId}/downloads/${jar}"
+  BUNGEE_JAR=$BUNGEE_HOME/${BUNGEE_JAR:=${project}-${version}-${buildId}.jar}
+}
+
+### MAIN
+
 handleDebugMode
 
 log "Resolving type given ${TYPE}"
@@ -155,44 +196,11 @@ case "${TYPE^^}" in
   ;;
 
   WATERFALL)
-    # Doc : https://papermc.io/api
-    : "${WATERFALL_VERSION:=latest}"
-    : "${WATERFALL_BUILD_ID:=latest}"
-
-    # Retrieve waterfall version
-    if [[ ${WATERFALL_VERSION^^} = LATEST ]]; then
-      WATERFALL_VERSION=$(curl -fsSL "https://papermc.io/api/v2/projects/waterfall" -H "accept: application/json" | jq -r '.versions[-1]')
-      if [ -z "$WATERFALL_VERSION" ]; then
-        echo "ERROR: failed to lookup PaperMC versions"
-        exit 1
-      fi
-    fi
-
-    # Retrieve waterfall build
-    if [[ ${WATERFALL_BUILD_ID^^} = LATEST ]]; then
-      WATERFALL_BUILD_ID=$(curl -fsSL "https://papermc.io/api/v2/projects/waterfall/versions/${WATERFALL_VERSION}" -H  "accept: application/json" \
-        | jq '.builds[-1]')
-      if [ -z $WATERFALL_BUILD_ID ]; then
-          echo "ERROR: failed to lookup PaperMC build from version ${WATERFALL_VERSION}"
-          exit 1
-      fi
-    fi
-
-    WATERFALL_JAR=$(curl -fsSL "https://papermc.io/api/v2/projects/waterfall/versions/${WATERFALL_VERSION}/builds/${WATERFALL_BUILD_ID}" \
-      -H  "accept: application/json" | jq -r '.downloads.application.name')
-    if [ -z $WATERFALL_JAR ]; then
-      echo "ERROR: failed to lookup PaperMC download file from version=${WATERFALL_VERSION} build=${WATERFALL_BUILD_ID}"
-      exit 1
-    fi
-
-    BUNGEE_JAR_URL="https://papermc.io/api/v2/projects/waterfall/versions/${WATERFALL_VERSION}/builds/${WATERFALL_BUILD_ID}/downloads/${WATERFALL_JAR}"
-    BUNGEE_JAR=$BUNGEE_HOME/${BUNGEE_JAR:=Waterfall-${WATERFALL_VERSION}-${WATERFALL_BUILD_ID}.jar}
+    getFromPaperMc waterfall "${WATERFALL_VERSION:-latest}" "${WATERFALL_BUILD_ID:-latest}"
   ;;
 
   VELOCITY)
-    : "${VELOCITY_VERSION:=latest}"
-    BUNGEE_JAR_URL="https://versions.velocitypowered.com/download/${VELOCITY_VERSION}.jar"
-    BUNGEE_JAR=$BUNGEE_HOME/Velocity-${VELOCITY_VERSION}.jar
+    getFromPaperMc velocity "${VELOCITY_VERSION:-latest}" "${VELOCITY_BUILD_ID:-latest}"
   ;;
 
   CUSTOM)
@@ -216,11 +224,8 @@ case "${TYPE^^}" in
 esac
 
 if isTrue "$download_required"; then
-  if [ -f "$BUNGEE_JAR" ]; then
-    zarg=(-z "$BUNGEE_JAR")
-  fi
   log "Downloading ${BUNGEE_JAR_URL}"
-  if ! curl -o "$BUNGEE_JAR" "${zarg[@]}" -fsSL "$BUNGEE_JAR_URL"; then
+  if ! get -o "$BUNGEE_JAR" --skip-up-to-date --log-progress-each "$BUNGEE_JAR_URL"; then
       echo "ERROR: failed to download" >&2
       exit 2
   fi
@@ -233,31 +238,15 @@ fi
 
 # If supplied with a URL for a plugin download it.
 if [[ "$PLUGINS" ]]; then
-for i in ${PLUGINS//,/ }
-do
-  EFFECTIVE_PLUGIN_URL=$(curl -Ls -o /dev/null -w %{url_effective} $i)
-  case "X$EFFECTIVE_PLUGIN_URL" in
-    X[Hh][Tt][Tt][Pp]*.jar)
-      log "Downloading plugin via HTTP"
-      log "  from $EFFECTIVE_PLUGIN_URL ..."
-      if ! curl -sSL -o /tmp/${EFFECTIVE_PLUGIN_URL##*/} $EFFECTIVE_PLUGIN_URL; then
-        echo "ERROR: failed to download from $EFFECTIVE_PLUGIN_URL to /tmp/${EFFECTIVE_PLUGIN_URL##*/}"
-        exit 2
-      fi
-
-      mkdir -p $BUNGEE_HOME/plugins
-      mv /tmp/${EFFECTIVE_PLUGIN_URL##*/} "$BUNGEE_HOME/plugins/${EFFECTIVE_PLUGIN_URL##*/}"
-      rm -f /tmp/${EFFECTIVE_PLUGIN_URL##*/}
-      ;;
-    *)
-      echo "ERROR: Invalid URL given for plugin list: Must be HTTP or HTTPS and a JAR file"
-      ;;
-  esac
-done
+  mkdir -p "$BUNGEE_HOME/plugins"
+  if ! get --skip-existing -o "$BUNGEE_HOME/plugins" "$PLUGINS"; then
+    echo "ERROR: failed to download plugin(s)"
+    exit 1
+  fi
 fi
 
 if [[ ${SPIGET_PLUGINS} ]]; then
-  if isTrue ${REMOVE_OLD_PLUGINS:-false}; then
+  if isTrue "${REMOVE_OLD_PLUGINS:-false}"; then
     removeOldMods $BUNGEE_HOME/plugins
     REMOVE_OLD_PLUGINS=false
   fi
@@ -271,21 +260,19 @@ fi
 
 # Download rcon plugin
 if [ "${TYPE^^}" = "VELOCITY" ]; then # Download UnioDex/VelocityRcon plugin
-  if isTrue "${ENABLE_RCON}" && [[ ! -e $BUNGEE_HOME/plugins/${RCON_VELOCITY_JAR_URL##*/} ]]; then
+  if isTrue "${ENABLE_RCON}"; then
     log "Downloading Velocity rcon plugin"
-    mkdir -p $BUNGEE_HOME/plugins/velocityrcon
 
-    if ! curl -sSL -o "$BUNGEE_HOME/plugins/${RCON_VELOCITY_JAR_URL##*/}" $RCON_VELOCITY_JAR_URL; then
-      echo "ERROR: failed to download from $RCON_VELOCITY_JAR_URL to /tmp/${RCON_VELOCITY_JAR_URL##*/}"
-      exit 2
+    mkdir -p "$BUNGEE_HOME/plugins"
+    if ! get -o "$BUNGEE_HOME/plugins" --skip-up-to-date --log-progress-each "$RCON_VELOCITY_JAR_URL"; then
+      echo "ERROR: failed to download from $RCON_VELOCITY_JAR_URL"
+      exit 1
     fi
 
     log "Copy Velocity rcon configuration"
-    sed -i 's#${PORT}#'"$RCON_PORT"'#g' /templates/rcon-velocity-config.toml
-    sed -i 's#${PASSWORD}#'"$RCON_PASSWORD"'#g' /templates/rcon-velocity-config.toml
-
-    mv /templates/rcon-velocity-config.toml "$BUNGEE_HOME/plugins/velocityrcon/rcon.toml"
-    rm -f /templates/rcon-velocity-config.toml
+    mkdir -p $BUNGEE_HOME/plugins/velocityrcon
+    sed -e 's#${PORT}#'"$RCON_PORT"'#g' -e 's#${PASSWORD}#'"$RCON_PASSWORD"'#g' \
+      /templates/rcon-velocity-config.toml > "$BUNGEE_HOME/plugins/velocityrcon/rcon.toml"
   fi
 else # Download orblazer/bungee-rcon plugin
   if isTrue "${ENABLE_RCON}" && [[ ! -e $BUNGEE_HOME/plugins/${RCON_JAR_URL##*/} ]]; then
@@ -322,8 +309,10 @@ if [[ ${INIT_MEMORY} || ${MAX_MEMORY} ]]; then
   fi
 fi
 
+JVM_OPTS="${JVM_OPTS} -Dlog4j2.formatMsgNoLookups=true"
+
 if [ $UID == 0 ]; then
   exec sudo -E -u bungeecord $JAVA_HOME/bin/java $JVM_XX_OPTS $JVM_OPTS -jar "$BUNGEE_JAR" "$@"
 else
-  exec $JAVA_HOME/bin/java $JVM_OPTS -jar "$BUNGEE_JAR" "$@"
+  exec $JAVA_HOME/bin/java $JVM_XX_OPTS $JVM_OPTS -jar "$BUNGEE_JAR" "$@"
 fi
