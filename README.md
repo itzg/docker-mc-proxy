@@ -148,7 +148,7 @@ healthy
 
 * **VELOCITY_BUILD_ID**=latest
 
-  For `TYPE=VELOCITY`, allows downloading a specific build of Waterfall within the given version.
+  For `TYPE=VELOCITY`, allows downloading a specific build of Velocity within the given version.
 
 * **HEALTH_HOST**=localhost
 
