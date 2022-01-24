@@ -1,4 +1,5 @@
-FROM ${BASE_IMAGE:-eclipse-temurin:17}
+ARG BASE_IMAGE=eclipse-temurin:17
+FROM ${BASE_IMAGE}
 
 VOLUME ["/server"]
 WORKDIR /server
