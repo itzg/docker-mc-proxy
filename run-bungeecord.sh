@@ -150,6 +150,12 @@ function processConfigs {
   fi
 }
 
+function pruneOlder() {
+  prefix=${1?}
+
+  find "$BUNGEE_HOME" -maxdepth 1 -type f -not -wholename "$BUNGEE_JAR" -name "${prefix}-*.jar" -delete
+}
+
 function getFromPaperMc() {
   local project=${1?}
   local version=${2?}
@@ -193,14 +199,17 @@ case "${TYPE^^}" in
     : "${BUNGEE_JAR_URL:=${BUNGEE_BASE_URL}/${BUNGEE_JOB_ID}/artifact/bootstrap/target/BungeeCord.jar}"
     : "${BUNGEE_JAR_REVISION:=${BUNGEE_JOB_ID}}"
     BUNGEE_JAR=$BUNGEE_HOME/${BUNGEE_JAR:=BungeeCord-${BUNGEE_JAR_REVISION}.jar}
+    pruningPrefix=BungeeCord
   ;;
 
   WATERFALL)
     getFromPaperMc waterfall "${WATERFALL_VERSION:-latest}" "${WATERFALL_BUILD_ID:-latest}"
+    pruningPrefix=waterfall
   ;;
 
   VELOCITY)
     getFromPaperMc velocity "${VELOCITY_VERSION:-latest}" "${VELOCITY_BUILD_ID:-latest}"
+    pruningPrefix=velocity
   ;;
 
   CUSTOM)
@@ -229,6 +238,10 @@ if isTrue "$download_required"; then
       echo "ERROR: failed to download" >&2
       exit 2
   fi
+fi
+98
+if [[ $pruningPrefix ]]; then
+  pruneOlder "$pruningPrefix"
 fi
 
 if [ -d /plugins ]; then
