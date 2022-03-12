@@ -272,7 +272,7 @@ if [[ ${SPIGET_PLUGINS} ]]; then
 fi
 
 # Download rcon plugin
-if [ "${TYPE^^}" = "VELOCITY" ]; then # Download UnioDex/VelocityRcon plugin
+if [[ "${TYPE^^}" == "VELOCITY" ]] || isTrue "${APPLY_VELOCITY_RCON:-false}"; then # Download UnioDex/VelocityRcon plugin
   if isTrue "${ENABLE_RCON}"; then
     log "Downloading Velocity rcon plugin"
 
@@ -287,7 +287,9 @@ if [ "${TYPE^^}" = "VELOCITY" ]; then # Download UnioDex/VelocityRcon plugin
     sed -e 's#${PORT}#'"$RCON_PORT"'#g' -e 's#${PASSWORD}#'"$RCON_PASSWORD"'#g' \
       /templates/rcon-velocity-config.toml > "$BUNGEE_HOME/plugins/velocityrcon/rcon.toml"
   fi
-else # Download orblazer/bungee-rcon plugin
+
+# Download orblazer/bungee-rcon plugin
+elif [[ "${TYPE^^}" == "BUNGEECORD" ]] || isTrue "${APPLY_BUNGEECORD_RCON:-false}"; then
   if isTrue "${ENABLE_RCON}" && [[ ! -e $BUNGEE_HOME/plugins/${RCON_JAR_URL##*/} ]]; then
     log "Downloading Bungee rcon plugin"
     mkdir -p $BUNGEE_HOME/plugins/bungee-rcon
