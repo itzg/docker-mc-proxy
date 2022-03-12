@@ -239,7 +239,7 @@ if isTrue "$download_required"; then
       exit 2
   fi
 fi
-98
+
 if [[ $pruningPrefix ]]; then
   pruneOlder "$pruningPrefix"
 fi
