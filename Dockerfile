@@ -37,12 +37,12 @@ COPY health.sh /
 
 # Add rcon-cli
 RUN easy-add --var os=${TARGETOS} --var arch=${TARGETARCH}${TARGETVARIANT} \
- --var version=1.5.1 --var app=rcon-cli --file {{.app}} \
+ --var version=1.6.0 --var app=rcon-cli --file {{.app}} \
  --from https://github.com/itzg/{{.app}}/releases/download/{{.version}}/{{.app}}_{{.version}}_{{.os}}_{{.arch}}.tar.gz
 COPY rcon-config.yml /templates/rcon-config.yml
 COPY rcon-velocity-config.toml /templates/rcon-velocity-config.toml 
 
-ARG MC_HELPER_VERSION=1.16.6
+ARG MC_HELPER_VERSION=1.16.11
 ARG MC_HELPER_BASE_URL=https://github.com/itzg/mc-image-helper/releases/download/v${MC_HELPER_VERSION}
 RUN curl -fsSL ${MC_HELPER_BASE_URL}/mc-image-helper-${MC_HELPER_VERSION}.tgz \
     | tar -C /usr/share -zxf - \
