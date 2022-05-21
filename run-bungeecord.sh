@@ -200,19 +200,23 @@ case "${TYPE^^}" in
     : "${BUNGEE_JAR_REVISION:=${BUNGEE_JOB_ID}}"
     BUNGEE_JAR=$BUNGEE_HOME/${BUNGEE_JAR:=BungeeCord-${BUNGEE_JAR_REVISION}.jar}
     pruningPrefix=BungeeCord
+    family=bungeecord
   ;;
 
   WATERFALL)
     getFromPaperMc waterfall "${WATERFALL_VERSION:-latest}" "${WATERFALL_BUILD_ID:-latest}"
     pruningPrefix=waterfall
-  ;;
+    family=bungeecord
+ ;;
 
   VELOCITY)
     getFromPaperMc velocity "${VELOCITY_VERSION:-latest}" "${VELOCITY_BUILD_ID:-latest}"
     pruningPrefix=velocity
+    family=velocity
   ;;
 
   CUSTOM)
+    family=bungeecord
     if [[ -v BUNGEE_JAR_URL ]]; then
       log "Using custom server jar at ${BUNGEE_JAR_URL} ..."
       BUNGEE_JAR=$BUNGEE_HOME/$(basename ${BUNGEE_JAR_URL})
@@ -272,7 +276,7 @@ if [[ ${SPIGET_PLUGINS} ]]; then
 fi
 
 # Download rcon plugin
-if [[ "${TYPE^^}" == "VELOCITY" ]] || isTrue "${APPLY_VELOCITY_RCON:-false}"; then # Download UnioDex/VelocityRcon plugin
+if [[ "${family}" == "velocity" ]] || isTrue "${APPLY_VELOCITY_RCON:-false}"; then # Download UnioDex/VelocityRcon plugin
   if isTrue "${ENABLE_RCON}"; then
     log "Downloading Velocity rcon plugin"
 
@@ -289,7 +293,7 @@ if [[ "${TYPE^^}" == "VELOCITY" ]] || isTrue "${APPLY_VELOCITY_RCON:-false}"; th
   fi
 
 # Download orblazer/bungee-rcon plugin
-elif [[ "${TYPE^^}" == "BUNGEECORD" ]] || isTrue "${APPLY_BUNGEECORD_RCON:-false}"; then
+elif [[ "${family}" == "bungeecord" ]] || isTrue "${APPLY_BUNGEECORD_RCON:-false}"; then
   if isTrue "${ENABLE_RCON}" && [[ ! -e $BUNGEE_HOME/plugins/${RCON_JAR_URL##*/} ]]; then
     log "Downloading Bungee rcon plugin"
     mkdir -p $BUNGEE_HOME/plugins/bungee-rcon

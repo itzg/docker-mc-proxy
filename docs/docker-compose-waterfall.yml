@@ -10,6 +10,7 @@ services:
     image: itzg/bungeecord
     environment:
       TYPE: WATERFALL
+      ENABLE_RCON: "true"
       DEBUG: "false"
     ports:
       - 25565:25577
