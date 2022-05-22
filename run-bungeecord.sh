@@ -330,6 +330,20 @@ fi
 
 JVM_OPTS="${JVM_OPTS} -Dlog4j2.formatMsgNoLookups=true"
 
+if isTrue "${ENABLE_JMX}"; then
+  : "${JMX_PORT:=7091}"
+  JVM_OPTS="${JVM_OPTS}
+  -Dcom.sun.management.jmxremote.local.only=false
+  -Dcom.sun.management.jmxremote.port=${JMX_PORT}
+  -Dcom.sun.management.jmxremote.rmi.port=${JMX_PORT}
+  -Dcom.sun.management.jmxremote.authenticate=false
+  -Dcom.sun.management.jmxremote.ssl=false
+  -Dcom.sun.management.jmxremote.host=${JMX_BINDING:-0.0.0.0}
+  -Djava.rmi.server.hostname=${JMX_HOST:-localhost}"
+
+  log "JMX is enabled. Make sure you have port forwarding for ${JMX_PORT}"
+fi
+
 if [ $UID == 0 ]; then
   exec sudo -E -u bungeecord $JAVA_HOME/bin/java $JVM_XX_OPTS $JVM_OPTS -jar "$BUNGEE_JAR" "$@"
 else
