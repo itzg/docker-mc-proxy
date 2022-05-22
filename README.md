@@ -158,6 +158,10 @@ healthy
 
   Set to "true" when using Bungeecord's `proxy_protocol` option
 
+* **ENABLE_JMX**=false
+
+  To enable remote JMX, such as for profiling with VisualVM or JMC, add the environment variable `ENABLE_JMX=true`, set `JMX_HOST` to the IP/host running the Docker container, and add a port forwarding of TCP port 7091
+
 ## Volumes
 
 * **/server**
