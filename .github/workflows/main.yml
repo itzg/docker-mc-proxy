@@ -17,16 +17,16 @@ jobs:
         variant: [latest, java17, java8, java11]
         include:
           - variant: latest
-            baseImage: eclipse-temurin:17
+            baseImage: eclipse-temurin:17-focal
             tagPrefix: ""
           - variant: java17
-            baseImage: eclipse-temurin:17
+            baseImage: eclipse-temurin:17-focal
             tagPrefix: java17-
           - variant: java8
-            baseImage: adoptopenjdk:8-jre-hotspot
+            baseImage: adoptopenjdk:8-jre-hotspot-focal
             tagPrefix: java8-
           - variant: java11
-            baseImage: adoptopenjdk:11-jre-hotspot
+            baseImage: adoptopenjdk:11-jre-hotspot-focal
             tagPrefix: java11-
 
     steps:
