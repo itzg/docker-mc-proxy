@@ -10,7 +10,6 @@ on:
 
 jobs:
   build:
-    if: github.repository_owner == 'itzg'
     runs-on: ubuntu-20.04
     strategy:
       matrix:
@@ -37,7 +36,7 @@ jobs:
       uses: docker/metadata-action@v4
       with:
         images: |
-          itzg/bungeecord
+          ${{ secrets.DOCKER_USER }}/bungeecord
         tags: |
           type=ref,event=branch,prefix=${{ matrix.tagPrefix }}
           type=ref,event=tag,prefix=${{ matrix.tagPrefix }}
