@@ -239,6 +239,22 @@ Unless you're on a home/private LAN, you should [enable TLS access](https://docs
 
 [BungeeCord Configuration Guide](https://www.spigotmc.org/wiki/bungeecord-configuration-guide/)
 
+### Generic pack files
+
+To install all the server content (jars, mods, plugins, configs, etc.) from a zip or tgz file, then set `GENERIC_PACK` to the container path or URL of the archive file.
+
+If multiple generic packs need to be applied together, set `GENERIC_PACKS` instead, with a comma separated list of archive file paths and/or URLs to files.
+
+To avoid repetition, each entry will be prefixed by the value of `GENERIC_PACKS_PREFIX` and suffixed by the value of `GENERIC_PACKS_SUFFIX`, both of which are optional. For example, the following variables
+
+```
+GENERIC_PACKS=configs-v9.0.1,mods-v4.3.6
+GENERIC_PACKS_PREFIX=https://cdn.example.org/
+GENERIC_PACKS_SUFFIX=.zip
+```
+
+would expand to `https://cdn.example.org/configs-v9.0.1.zip,https://cdn.example.org/mods-v4.3.6.zip`.
+
 ### Replacing variables inside configs
 
 Sometimes you have mods or plugins that require configuration information that is only available at runtime.

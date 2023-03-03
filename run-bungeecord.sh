@@ -9,6 +9,9 @@
 : "${INIT_MEMORY:=${MEMORY}}"
 : "${MAX_MEMORY:=${MEMORY}}"
 : "${SYNC_SKIP_NEWER_IN_DESTINATION:=true}"
+: "${GENERIC_PACKS:=${GENERIC_PACK}}"
+: "${GENERIC_PACKS_PREFIX:=}"
+: "${GENERIC_PACKS_SUFFIX:=}"
 : "${REPLACE_ENV_DURING_SYNC:=true}"
 : "${REPLACE_ENV_VARIABLES:=false}"
 : "${REPLACE_ENV_SUFFIXES:=yml,yaml,txt,cfg,conf,properties,hjson,json,tml,toml}"
@@ -20,6 +23,8 @@ BUNGEE_HOME=/server
 RCON_JAR_URL=https://github.com/orblazer/bungee-rcon/releases/download/v${RCON_JAR_VERSION}/bungee-rcon-${RCON_JAR_VERSION}.jar
 RCON_VELOCITY_JAR_URL=https://github.com/UnioDex/VelocityRcon/releases/download/v${RCON_VELOCITY_JAR_VERSION}/VelocityRcon.jar
 download_required=true
+
+set -eo pipefail
 
 function isTrue() {
   local value=${1,,}
@@ -77,6 +82,65 @@ function containsJars() {
   done <<<"$(unzip -l "$file")"
 
   return 1
+}
+
+function isURL() {
+  local value=$1
+
+  if [[ ${value:0:8} == "https://" || ${value:0:7} == "http://" || ${value:0:6} == "ftp://" ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+function genericPacks() {
+  IFS=',' read -ra packs <<< "${GENERIC_PACKS}"
+
+  packFiles=()
+  for packEntry in "${packs[@]}"; do
+    pack="${GENERIC_PACKS_PREFIX}${packEntry}${GENERIC_PACKS_SUFFIX}"
+    if isURL "${pack}"; then
+      mkdir -p "${BUNGEE_HOME}/packs"
+      log "Downloading generic pack from $pack"
+      if ! outfile=$(mc-image-helper -o "${BUNGEE_HOME}/packs" --output-filename --skip-up-to-date "$pack"); then
+        log "ERROR: failed to download $pack"
+        exit 2
+      fi
+      packFiles+=("$outfile")
+    else
+      packFiles+=("$pack")
+    fi
+  done
+
+  log "Applying generic pack(s)..."
+  original_base_dir="${BUNGEE_HOME}/.tmp/generic_pack_base"
+  base_dir=$original_base_dir
+  rm -rf "${base_dir}"
+  mkdir -p "${base_dir}"
+  for pack in "${packFiles[@]}"; do
+    unzip -o -q -d "${base_dir}" "${pack}"
+  done
+
+  if [ -f "${BUNGEE_HOME}/manifest.txt" ]; then
+    log "Manifest exists from older generic pack, cleaning up ..."
+    while read -r f; do
+      rm -rf "${BUNGEE_HOME}/${f}"
+    done < "${BUNGEE_HOME}/packs/manifest.txt"
+    find "${BUNGEE_HOME}" -mindepth 1 -depth -type d -empty -delete
+    rm -f "${BUNGEE_HOME}/manifest.txt"
+  fi
+
+  log "Writing generic pack manifest ... "
+  find "${base_dir}" -type f -printf "%P\n" > "${BUNGEE_HOME}/manifest.txt"
+
+  log "Applying generic pack ..."
+  cp -R -f "${base_dir}"/* "${BUNGEE_HOME}"
+  rm -rf $original_base_dir
+
+  if [ $UID == 0 ]; then
+    chown -R bungeecord:bungeecord "${BUNGEE_HOME}"
+  fi
 }
 
 function getResourceFromSpiget() {
@@ -145,7 +209,7 @@ function processConfigs {
       --replace-env-excludes="${REPLACE_ENV_VARIABLES_EXCLUDES}" \
       --replace-env-exclude-paths="${REPLACE_ENV_VARIABLES_EXCLUDE_PATHS}" \
       --replace-env-prefix="${REPLACE_ENV_VARIABLE_PREFIX}" \
-      /server
+      "${BUNGEE_HOME}"
 
   fi
 }
@@ -190,6 +254,10 @@ function getFromPaperMc() {
 ### MAIN
 
 handleDebugMode
+
+if [[ ${GENERIC_PACKS} ]]; then
+  genericPacks
+fi
 
 log "Resolving type given ${TYPE}"
 case "${TYPE^^}" in
