@@ -13,8 +13,7 @@ RUN apt-get update \
     tzdata \
     nano \
     unzip \
-    ttf-dejavu \
-    && apt-get clean
+  && apt-get clean
 
 RUN addgroup --gid 1000 bungeecord \
   && adduser --system --shell /bin/false --uid 1000 --ingroup bungeecord --home /server bungeecord
