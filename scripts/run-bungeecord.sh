@@ -103,7 +103,7 @@ function genericPacks() {
     if isURL "${pack}"; then
       mkdir -p "${BUNGEE_HOME}/packs"
       log "Downloading generic pack from $pack"
-      if ! outfile=$(mc-image-helper -o "${BUNGEE_HOME}/packs" --output-filename --skip-up-to-date "$pack"); then
+      if ! outfile=$(mc-image-helper get -o "${BUNGEE_HOME}/packs" --output-filename --skip-up-to-date "$pack"); then
         log "ERROR: failed to download $pack"
         exit 2
       fi
@@ -125,7 +125,7 @@ function genericPacks() {
   if [ -f "${BUNGEE_HOME}/manifest.txt" ]; then
     log "Manifest exists from older generic pack, cleaning up ..."
     while read -r f; do
-      rm -rf "${BUNGEE_HOME}/${f}"
+      rm -rf "${BUNGEE_HOME:?}/${f}"
     done < "${BUNGEE_HOME}/packs/manifest.txt"
     find "${BUNGEE_HOME}" -mindepth 1 -depth -type d -empty -delete
     rm -f "${BUNGEE_HOME}/manifest.txt"
@@ -366,17 +366,20 @@ elif [[ "${family}" == "bungeecord" ]] || isTrue "${APPLY_BUNGEECORD_RCON:-false
     log "Downloading Bungee rcon plugin"
     mkdir -p $BUNGEE_HOME/plugins/bungee-rcon
 
-    if ! curl -sSL -o "$BUNGEE_HOME/plugins/${RCON_JAR_URL##*/}" $RCON_JAR_URL; then
+    if ! mc-image-helper get -o "$BUNGEE_HOME/plugins/${RCON_JAR_URL##*/}" "$RCON_JAR_URL"; then
       echo "ERROR: failed to download from $RCON_JAR_URL to /tmp/${RCON_JAR_URL##*/}"
       exit 2
     fi
 
-    log "Copy Bungee rcon configuration"
-    sed -i 's#${PORT}#'"$RCON_PORT"'#g' /templates/rcon-config.yml
-    sed -i 's#${PASSWORD}#'"$RCON_PASSWORD"'#g' /templates/rcon-config.yml
-
-    mv /templates/rcon-config.yml "$BUNGEE_HOME/plugins/bungee-rcon/config.yml"
-    rm -f /templates/rcon-config.yml
+    configFile="$BUNGEE_HOME/plugins/bungee-rcon/config.yml"
+    if [ ! -e "$configFile" ]; then
+       log "Copy Bungee rcon configuration"
+       # shellcheck disable=SC2016
+       sed \
+         -e 's#${PORT}#'"$RCON_PORT"'#g' \
+         -e 's#${PASSWORD}#'"$RCON_PASSWORD"'#g' \
+         /templates/rcon-config.yml > "$configFile"
+    fi
   fi
 fi
 
