@@ -32,25 +32,26 @@ RUN chmod +x /usr/bin/easy-add
 RUN easy-add --var os=${TARGETOS} --var arch=${TARGETARCH}${TARGETVARIANT} \
  --var version=0.10.6 --var app=mc-monitor --file {{.app}} \
  --from https://github.com/itzg/{{.app}}/releases/download/{{.version}}/{{.app}}_{{.version}}_{{.os}}_{{.arch}}.tar.gz
-COPY health.sh /
 
 # Add rcon-cli
 RUN easy-add --var os=${TARGETOS} --var arch=${TARGETARCH}${TARGETVARIANT} \
  --var version=1.6.0 --var app=rcon-cli --file {{.app}} \
  --from https://github.com/itzg/{{.app}}/releases/download/{{.version}}/{{.app}}_{{.version}}_{{.os}}_{{.arch}}.tar.gz
-COPY rcon-config.yml /templates/rcon-config.yml
-COPY rcon-velocity-config.toml /templates/rcon-velocity-config.toml 
 
-ARG MC_HELPER_VERSION=1.16.11
-ARG MC_HELPER_BASE_URL=https://github.com/itzg/mc-image-helper/releases/download/v${MC_HELPER_VERSION}
+COPY --chmod=444 templates/ /templates/
+
+ARG MC_HELPER_VERSION=1.32.4
+ARG MC_HELPER_BASE_URL=https://github.com/itzg/mc-image-helper/releases/download/${MC_HELPER_VERSION}
+# used for cache busting local copy of mc-image-helper
+ARG MC_HELPER_REV=1
 RUN curl -fsSL ${MC_HELPER_BASE_URL}/mc-image-helper-${MC_HELPER_VERSION}.tgz \
-    | tar -C /usr/share -zxf - \
-    && ln -s /usr/share/mc-image-helper-${MC_HELPER_VERSION}/bin/mc-image-helper /usr/bin
+  | tar -C /usr/share -zxf - \
+  && ln -s /usr/share/mc-image-helper-${MC_HELPER_VERSION}/bin/mc-image-helper /usr/bin
 
 ENV SERVER_PORT=25577 RCON_PORT=25575 MEMORY=512m
 EXPOSE $SERVER_PORT
 
 CMD ["/usr/bin/run-bungeecord.sh"]
-HEALTHCHECK --start-period=10s CMD /health.sh
+HEALTHCHECK --start-period=10s CMD /usr/bin/health.sh
 
-COPY *.sh /usr/bin/
+COPY --chmod=755 /scripts/* /usr/bin/
