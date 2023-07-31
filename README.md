@@ -54,6 +54,10 @@ healthy
 
   Setting this to an image URL will download and (if required) convert the icon to a 64x64 PNG, and place it in `/server/server-icon.png`.
 
+* **OVERRIDE_ICON**
+
+  Will override any pre-existing server-icon.png file in the /server directory if `ICON` is set.
+
 * **INIT_MEMORY**=${MEMORY}
 
   Can be set to use a different initial heap size.
