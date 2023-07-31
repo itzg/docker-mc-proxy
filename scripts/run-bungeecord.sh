@@ -312,6 +312,40 @@ if isTrue "$download_required"; then
   fi
 fi
 
+if [ -n "$ICON" ]; then
+    if [ ! -e server-icon.png ] || isTrue "${OVERRIDE_ICON}"; then
+      log "Using server icon from $ICON..."
+      if isURL "$ICON"; then
+        # Not sure what it is yet...call it "img"
+        if ! get -o /tmp/icon.img "$ICON"; then
+          log "ERROR: failed to download icon from $ICON"
+          exit 1
+        fi
+        ICON=/tmp/icon.img
+        iconSrc="url"
+      elif [ -f "$ICON" ]; then
+        iconSrc="file"
+      else
+        log "ERROR: $ICON does not appear to be a URL or existing file"
+        exit 1
+      fi
+      read -r -a specs < <(identify "$ICON" | awk 'NR == 1 { print $2, $3 }')
+      if [ "${specs[0]} ${specs[1]}" = "PNG 64x64" ]; then
+        if [ $iconSrc = url ]; then
+          mv -f /tmp/icon.img /server/server-icon.png
+        else
+          cp -f "$ICON" /server/server-icon.png
+        fi
+      elif [ "${specs[0]}" = GIF ]; then
+        log "Converting GIF image to 64x64 PNG..."
+        convert "$ICON"[0] -resize 64x64! /server/server-icon.png
+      else
+        log "Converting image to 64x64 PNG..."
+        convert "$ICON" -resize 64x64! /server/server-icon.png
+      fi
+    fi
+fi
+
 if [[ $pruningPrefix ]]; then
   pruneOlder "$pruningPrefix"
 fi

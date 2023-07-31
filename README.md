@@ -50,6 +50,14 @@ healthy
 
   The Java memory heap size to specify to the JVM. Setting this to an empty string will let the JVM calculate the heap size from the container declared memory limit. Be sure to consider adding `-XX:MaxRAMPercentage=<n>` (with `<n>` replaced) to `JVM_XX_OPTS`, where the JVM default is 25%.
 
+* **ICON**
+
+  Setting this to an image URL will download and (if required) convert the icon to a 64x64 PNG, and place it in `/server/server-icon.png`.
+
+* **OVERRIDE_ICON**
+
+  Will override any pre-existing server-icon.png file in the /server directory if `ICON` is set.
+
 * **INIT_MEMORY**=${MEMORY}
 
   Can be set to use a different initial heap size.

@@ -13,6 +13,7 @@ RUN apt-get update \
     tzdata \
     nano \
     unzip \
+    imagemagick \
   && apt-get clean
 
 RUN addgroup --gid 1000 bungeecord \
