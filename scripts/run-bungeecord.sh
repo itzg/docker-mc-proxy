@@ -18,6 +18,9 @@
 : "${REPLACE_ENV_VARIABLE_PREFIX:=${ENV_VARIABLE_PREFIX:-CFG_}}"
 : "${REPLACE_ENV_VARIABLES_EXCLUDES:=}"
 : "${REPLACE_ENV_VARIABLES_EXCLUDE_PATHS:=}"
+: "${MODRINTH_PROJECTS:=}"
+: "${MODRINTH_DOWNLOAD_OPTIONAL_DEPENDENCIES:=true}"
+: "${MODRINTH_ALLOWED_VERSION_TYPE:=release}"
 
 BUNGEE_HOME=/server
 RCON_JAR_URL=https://github.com/orblazer/bungee-rcon/releases/download/v${RCON_JAR_VERSION}/bungee-rcon-${RCON_JAR_VERSION}.jar
@@ -358,10 +361,11 @@ fi
 # If supplied with a URL for a plugin download it.
 if [[ "$PLUGINS" ]]; then
   mkdir -p "$BUNGEE_HOME/plugins"
-  if ! get --skip-existing -o "$BUNGEE_HOME/plugins" "$PLUGINS"; then
-    echo "ERROR: failed to download plugin(s)"
-    exit 1
-  fi
+  mc-image-helper mcopy \
+          --glob=*.jar \
+          --scope=var-list \
+          --to="$BUNGEE_HOME/plugins" \
+          "$PLUGINS"
 fi
 
 if [[ ${SPIGET_PLUGINS} ]]; then
@@ -375,6 +379,16 @@ if [[ ${SPIGET_PLUGINS} ]]; then
   for resource in "${resources[@]}"; do
     getResourceFromSpiget "${resource}" "$BUNGEE_HOME/plugins"
   done
+fi
+
+if [[ $MODRINTH_PROJECTS ]] then
+  mc-image-helper modrinth \
+    --output-directory=/data \
+    --projects="${MODRINTH_PROJECTS}" \
+    --game-version="${VERSION}" \
+    --loader="${family}" \
+    --download-optional-dependencies="${MODRINTH_DOWNLOAD_OPTIONAL_DEPENDENCIES}" \
+    --allowed-version-type="${MODRINTH_ALLOWED_VERSION_TYPE}"
 fi
 
 # Download rcon plugin
