@@ -67,7 +67,7 @@ function log() {
 
 function get() {
   local flags=()
-  if isTrue "${DEBUG_GET:-false}"; then.
+  if isTrue "${DEBUG_GET:-false}"; then
     flags+=("--debug")
   fi
   mc-image-helper "${flags[@]}" get "$@"
@@ -113,7 +113,7 @@ function genericPacks() {
       packFiles+=("$outfile")
     else
       packFiles+=("$pack")
-    fi.
+    fi
   done
 
   log "Applying generic pack(s)..."
@@ -156,7 +156,7 @@ function getResourceFromSpiget() {
   url="https://api.spiget.org/v2/resources/${resource}/download"
   if ! curl -o "${tmpfile}" -fsSL -H "User-Agent: itzg/minecraft-server" "${extraCurlArgs[@]}" "${url}"; then
     log "ERROR failed to download resource '${resource}' from ${url}"
-    exit 2.
+    exit 2
   fi
 
   mkdir -p ${dest}
