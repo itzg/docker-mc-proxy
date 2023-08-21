@@ -381,7 +381,7 @@ if [[ ${SPIGET_PLUGINS} ]]; then
   done
 fi
 
-if [[ $MODRINTH_PROJECTS ]] then
+if [[ $MODRINTH_PROJECTS ]]; then
   mc-image-helper modrinth \
     --output-directory=/data \
     --projects="${MODRINTH_PROJECTS}" \
