@@ -27,7 +27,8 @@ jobs:
           - variant: java11
             baseImage: adoptopenjdk:11-jre-hotspot-focal
             tagPrefix: java11-
-
+    env:
+      DOCKER_HUB_ORG: itzg
     steps:
     - uses: actions/checkout@v3
 
@@ -36,7 +37,7 @@ jobs:
       uses: docker/metadata-action@v4
       with:
         images: |
-          ${{ secrets.DOCKER_USER }}/bungeecord
+          ${{ env.DOCKER_HUB_ORG }}/bungeecord
         tags: |
           type=ref,event=branch,prefix=${{ matrix.tagPrefix }}
           type=ref,event=tag,prefix=${{ matrix.tagPrefix }}
