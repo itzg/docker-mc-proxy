@@ -19,7 +19,7 @@
 : "${REPLACE_ENV_VARIABLES_EXCLUDES:=}"
 : "${REPLACE_ENV_VARIABLES_EXCLUDE_PATHS:=}"
 : "${MODRINTH_PROJECTS:=}"
-: "${MODRINTH_DOWNLOAD_OPTIONAL_DEPENDENCIES:=true}"
+: "${MODRINTH_DOWNLOAD_DEPENDENCIES:=required}"
 : "${MODRINTH_ALLOWED_VERSION_TYPE:=release}"
 
 BUNGEE_HOME=/server
@@ -159,10 +159,10 @@ function getResourceFromSpiget() {
     exit 2
   fi
 
-  mkdir -p ${dest}
+  mkdir -p "${dest}"
   if containsJars "${tmpfile}"; then
     log "Extracting contents of resource ${resource} into plugins"
-    unzip -o -q -d ${dest} "${tmpfile}"
+    unzip -o -q -d "${dest}" "${tmpfile}"
     rm "${tmpfile}"
   else
     log "Moving resource ${resource} into plugins"
@@ -308,7 +308,6 @@ case "${TYPE^^}" in
 esac
 
 if isTrue "$download_required"; then
-  log "Downloading ${BUNGEE_JAR_URL}"
   if ! get -o "$BUNGEE_JAR" --skip-up-to-date --log-progress-each "$BUNGEE_JAR_URL"; then
       echo "ERROR: failed to download" >&2
       exit 2
@@ -382,12 +381,17 @@ if [[ ${SPIGET_PLUGINS} ]]; then
 fi
 
 if [[ $MODRINTH_PROJECTS ]]; then
+  if ! [[ -v MINECRAFT_VERSION ]]; then
+    log "ERROR: plugins via MODRINTH_PROJECTS require MINECRAFT_VERSION to be set to corresponding Minecraft game version"
+    exit 1
+  fi
+
   mc-image-helper modrinth \
     --output-directory=/data \
     --projects="${MODRINTH_PROJECTS}" \
-    --game-version="${VERSION}" \
+    --game-version="${MINECRAFT_VERSION}" \
     --loader="${family}" \
-    --download-optional-dependencies="${MODRINTH_DOWNLOAD_OPTIONAL_DEPENDENCIES}" \
+    --download-dependencies="${MODRINTH_DOWNLOAD_DEPENDENCIES}" \
     --allowed-version-type="${MODRINTH_ALLOWED_VERSION_TYPE}"
 fi
 
@@ -464,7 +468,7 @@ if isTrue "${ENABLE_JMX}"; then
 fi
 
 if [ $UID == 0 ]; then
-  exec sudo -E -u bungeecord $JAVA_HOME/bin/java $JVM_XX_OPTS $JVM_OPTS -jar "$BUNGEE_JAR" "$@"
+  exec sudo -E -u bungeecord "$JAVA_HOME/bin/java" $JVM_XX_OPTS $JVM_OPTS -jar "$BUNGEE_JAR" "$@"
 else
-  exec $JAVA_HOME/bin/java $JVM_XX_OPTS $JVM_OPTS -jar "$BUNGEE_JAR" "$@"
+  exec "$JAVA_HOME/bin/java" $JVM_XX_OPTS $JVM_OPTS -jar "$BUNGEE_JAR" "$@"
 fi

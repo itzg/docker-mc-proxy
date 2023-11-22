@@ -95,6 +95,19 @@ healthy
                                                        ===
   ```
 
+* **MODRINTH_PROJECTS**
+
+  Comma or newline separated list of project slugs (short name) or IDs. The project ID is located in the "Technical information" section. The slug is the part of the page URL that follows `/mod/`:
+  ```
+    https://modrinth.com/mod/fabric-api
+                             ----------
+                              |
+                              +-- project slug
+  ```
+  Also, a specific version/type can be declared using colon symbol and version id/type after the project slug. The version id can be found in the 'Metadata' section. Valid version types are `release`, `beta`, `alpha`.
+
+  **NOTE** The variable `MINECRAFT_VERSION` must be set to the corresponding Minecraft version. 
+
 * **ENABLE_RCON**
 
   Enable the rcon server (uses a third-party plugin to work).
