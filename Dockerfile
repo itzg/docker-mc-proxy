@@ -25,23 +25,23 @@ ARG TARGETOS
 ARG TARGETARCH
 ARG TARGETVARIANT
 
-ARG EASY_ADD_VER=0.7.1
+ARG EASY_ADD_VER=0.8.1
 ADD https://github.com/itzg/easy-add/releases/download/${EASY_ADD_VER}/easy-add_${TARGETOS}_${TARGETARCH}${TARGETVARIANT} /usr/bin/easy-add
 RUN chmod +x /usr/bin/easy-add
 
 # Add mc-monitor
 RUN easy-add --var os=${TARGETOS} --var arch=${TARGETARCH}${TARGETVARIANT} \
- --var version=0.10.6 --var app=mc-monitor --file {{.app}} \
+ --var version=0.12.5 --var app=mc-monitor --file {{.app}} \
  --from https://github.com/itzg/{{.app}}/releases/download/{{.version}}/{{.app}}_{{.version}}_{{.os}}_{{.arch}}.tar.gz
 
 # Add rcon-cli
 RUN easy-add --var os=${TARGETOS} --var arch=${TARGETARCH}${TARGETVARIANT} \
- --var version=1.6.0 --var app=rcon-cli --file {{.app}} \
+ --var version=1.6.3 --var app=rcon-cli --file {{.app}} \
  --from https://github.com/itzg/{{.app}}/releases/download/{{.version}}/{{.app}}_{{.version}}_{{.os}}_{{.arch}}.tar.gz
 
 COPY --chmod=444 templates/ /templates/
 
-ARG MC_HELPER_VERSION=1.33.3
+ARG MC_HELPER_VERSION=1.36.12
 ARG MC_HELPER_BASE_URL=https://github.com/itzg/mc-image-helper/releases/download/${MC_HELPER_VERSION}
 # used for cache busting local copy of mc-image-helper
 ARG MC_HELPER_REV=1
