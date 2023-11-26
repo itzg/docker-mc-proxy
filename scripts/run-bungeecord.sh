@@ -187,7 +187,7 @@ function processConfigs {
   if [ -d /config ]; then
       log "Copying configs over..."
 
-      mc-image-helper --debug="${DEBUG}" $subcommand \
+      mc-image-helper $subcommand \
         --skip-newer-in-destination="${SYNC_SKIP_NEWER_IN_DESTINATION}" \
         --replace-env-file-suffixes="${REPLACE_ENV_SUFFIXES}" \
         --replace-env-excludes="${REPLACE_ENV_VARIABLES_EXCLUDES}" \
@@ -207,7 +207,7 @@ function processConfigs {
   # Replace environment variables in config files
   if isTrue "${REPLACE_ENV_VARIABLES}"; then
     log "Replacing env variables in configs that match the prefix $REPLACE_ENV_VARIABLE_PREFIX..."
-    mc-image-helper --debug=${DEBUG} interpolate \
+    mc-image-helper interpolate \
       --replace-env-file-suffixes="${REPLACE_ENV_SUFFIXES}" \
       --replace-env-excludes="${REPLACE_ENV_VARIABLES_EXCLUDES}" \
       --replace-env-exclude-paths="${REPLACE_ENV_VARIABLES_EXCLUDE_PATHS}" \
@@ -215,6 +215,14 @@ function processConfigs {
       "${BUNGEE_HOME}"
 
   fi
+
+  if [[ -v PATCH_DEFINITIONS ]]; then
+    log "Applying patch definitions from ${PATCH_DEFINITIONS}"
+    mc-image-helper patch \
+      --patch-env-prefix="${REPLACE_ENV_VARIABLE_PREFIX}" \
+      "${PATCH_DEFINITIONS}"
+  fi
+
 }
 
 function pruneOlder() {
