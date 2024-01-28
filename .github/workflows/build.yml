@@ -13,7 +13,12 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        variant: [ latest, java17, java8, java11 ]
+        variant:
+          - latest
+          - java17
+          - java21
+          - java8
+          - java11
         include:
           - variant: latest
             baseImage: eclipse-temurin:17-focal
@@ -21,6 +26,9 @@ jobs:
           - variant: java17
             baseImage: eclipse-temurin:17-focal
             tagPrefix: java17-
+          - variant: java21
+            baseImage: eclipse-temurin:21-jre
+            tagPrefix: java21-
           - variant: java8
             baseImage: adoptopenjdk:8-jre-hotspot-focal
             tagPrefix: java8-
