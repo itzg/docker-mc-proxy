@@ -22,18 +22,23 @@ jobs:
         include:
           - variant: latest
             baseImage: eclipse-temurin:17-focal
+            platforms: linux/amd64,linux/arm/v7,linux/arm64
             tagPrefix: ""
           - variant: java17
             baseImage: eclipse-temurin:17-focal
+            platforms: linux/amd64,linux/arm/v7,linux/arm64
             tagPrefix: java17-
           - variant: java21
             baseImage: eclipse-temurin:21-jre
+            platforms: linux/amd64,linux/arm64
             tagPrefix: java21-
           - variant: java8
             baseImage: adoptopenjdk:8-jre-hotspot-focal
+            platforms: linux/amd64,linux/arm/v7,linux/arm64
             tagPrefix: java8-
           - variant: java11
             baseImage: adoptopenjdk:11-jre-hotspot-focal
+            platforms: linux/amd64,linux/arm/v7,linux/arm64
             tagPrefix: java11-
     env:
       DOCKER_HUB_ORG: itzg
@@ -70,7 +75,7 @@ jobs:
         id: docker_build
         uses: docker/build-push-action@v5.1.0
         with:
-          platforms: linux/amd64,linux/arm/v7,linux/arm64
+          platforms: ${{ matrix.platforms }}
           # ensure latest base image is used
           pull: true
           push: true
