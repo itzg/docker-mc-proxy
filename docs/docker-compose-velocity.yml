@@ -15,7 +15,7 @@ services:
     ports:
       - "25565:25577"
     volumes:
-      - ./config.yml:/config/config.yml
+      - ./velocity.toml:/server/velocity.toml
       - proxy:/server
 
 volumes:
