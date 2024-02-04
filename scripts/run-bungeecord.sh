@@ -395,7 +395,7 @@ if [[ $MODRINTH_PROJECTS ]]; then
   fi
 
   mc-image-helper modrinth \
-    --output-directory=/data \
+    --output-directory=/server \
     --projects="${MODRINTH_PROJECTS}" \
     --game-version="${MINECRAFT_VERSION}" \
     --loader="${family}" \
