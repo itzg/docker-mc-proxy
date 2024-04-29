@@ -43,7 +43,7 @@ jobs:
     env:
       DOCKER_HUB_ORG: itzg
     steps:
-      - uses: actions/checkout@v4.1.3
+      - uses: actions/checkout@v4.1.4
 
       - name: Docker meta
         id: meta
