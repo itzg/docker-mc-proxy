@@ -1,18 +1,17 @@
-version: '3.5'
-
 services:
   mc:
     image: itzg/minecraft-server
     environment:
       EULA: "TRUE"
+      TYPE: PAPER
       ONLINE_MODE: "FALSE"
-  bungeecord:
+  proxy:
     image: itzg/bungeecord
     environment:
       TYPE: WATERFALL
       ENABLE_RCON: "true"
       DEBUG: "false"
     ports:
-      - 25565:25577
+      - "25565:25577"
     volumes:
       - ./config.yml:/config/config.yml
