@@ -375,12 +375,18 @@ if [[ "$PLUGINS" ]]; then
           "$PLUGINS"
 fi
 
-if [[ ${SPIGET_PLUGINS} ]]; then
-  if isTrue "${REMOVE_OLD_PLUGINS:-false}"; then
-    removeOldMods $BUNGEE_HOME/plugins
-    REMOVE_OLD_PLUGINS=false
-  fi
+# Remove old plugins as long as REMOVE_OLD_PLUGINS or REMOVE_OLD_MODS is set to true
+# REMOVE_OLD_MODS is available to be consistent with the docker-minecraft-server image
+# Note that only REMOVE_OLD_MODS_EXCLUDE and REMOVE_OLD_MODS_INCLUDE are supported.
+if isTrue "${REMOVE_OLD_PLUGINS:-false}" || isTrue "${REMOVE_OLD_MODS:-false}"; then
+  log "Removing old plugins including:${REMOVE_OLD_MODS_INCLUDE} excluding:${REMOVE_OLD_MODS_EXCLUDE}"
+  removeOldMods $BUNGEE_HOME/plugins
+  REMOVE_OLD_PLUGINS=false
+  REMOVE_OLD_MODS=false
+fi
 
+# Download plugins from spigotmc and put them in the plugins folder
+if [[ ${SPIGET_PLUGINS} ]]; then
   log "Getting plugins via Spiget"
   IFS=',' read -r -a resources <<<"${SPIGET_PLUGINS}"
   for resource in "${resources[@]}"; do
