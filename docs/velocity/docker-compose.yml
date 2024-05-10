@@ -4,6 +4,7 @@ services:
     environment:
       EULA: "TRUE"
       ONLINE_MODE: "FALSE"
+      TYPE: PAPER
   proxy:
     image: itzg/bungeecord
     environment:
@@ -13,7 +14,8 @@ services:
     ports:
       - "25565:25577"
     volumes:
-      - ./velocity.toml:/server/velocity.toml
+      - ./velocity.toml:/config/velocity.toml:ro
+      - ./forwarding.secret:/config/forwarding.secret:ro
       - proxy:/server
 
 volumes:
