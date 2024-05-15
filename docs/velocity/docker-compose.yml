@@ -1,11 +1,13 @@
-version: '3.5'
-
 services:
   mc:
     image: itzg/minecraft-server
     environment:
       EULA: "TRUE"
       ONLINE_MODE: "FALSE"
+      TYPE: PAPER
+      SYNC_SKIP_NEWER_IN_DESTINATION: false
+    volumes:
+      - ./paper-global.yml:/config/paper-global.yml
   proxy:
     image: itzg/bungeecord
     environment:
@@ -15,7 +17,8 @@ services:
     ports:
       - "25565:25577"
     volumes:
-      - ./velocity.toml:/server/velocity.toml
+      - ./velocity.toml:/config/velocity.toml:ro
+      - ./forwarding.secret:/config/forwarding.secret:ro
       - proxy:/server
 
 volumes:
