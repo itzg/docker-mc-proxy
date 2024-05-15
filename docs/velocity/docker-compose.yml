@@ -5,6 +5,9 @@ services:
       EULA: "TRUE"
       ONLINE_MODE: "FALSE"
       TYPE: PAPER
+      SYNC_SKIP_NEWER_IN_DESTINATION: false
+    volumes:
+      - ./paper-global.yml:/config/paper-global.yml
   proxy:
     image: itzg/bungeecord
     environment:
