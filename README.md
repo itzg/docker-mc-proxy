@@ -3,7 +3,7 @@ This is a Docker image of [BungeeCord](https://www.spigotmc.org/wiki/bungeecord/
 and is intended to be used at the front-end of a cluster of
 [itzg/minecraft-server](https://hub.docker.com/r/itzg/minecraft-server/) containers.
 
-[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/itzg/docker-bungeecord/Build%20and%20Publish)](https://github.com/itzg/docker-bungeecord/actions/workflows/main.yml)
+[![Build and Publish](https://github.com/itzg/docker-bungeecord/actions/workflows/build.yml/badge.svg)](https://github.com/itzg/docker-bungeecord/actions/workflows/build.yml)
 
 ## Using with itzg/minecraft-server image
 
@@ -396,3 +396,23 @@ This image may be run as a non-root user but does require an attached `/server`
 volume that is writable by that uid, such as:
 
     docker run ... -u $uid -v $(pwd)/data:/server itzg/bungeecord
+
+## Java Versions
+
+The `latest` image tag is based on Java 21, but alternate image tags are available to run with a different java version. 
+
+The image Java variant can be used as shown here:
+
+    itzg/bungeecord:{variant}
+
+or using release version, such as `2024.5.0`
+
+    itzg/bungeecord:{release}-{variant}
+
+| Variant | Java Version | CPU types         |
+|---------|--------------|-------------------|
+| latest  | 21           | amd64,arm64       |
+| java21  | 21           | amd64,arm64       |
+| java17  | 17           | amd64,arm64,armv7 |
+| java11  | 11           | amd64,arm64,armv7 |
+| java8   | 8            | amd64,arm64,armv7 |
