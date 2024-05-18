@@ -14,16 +14,11 @@ jobs:
     strategy:
       matrix:
         variant:
-          - latest
-          - java17
           - java21
-          - java8
+          - java17
           - java11
+          - java8
         include:
-          - variant: latest
-            baseImage: eclipse-temurin:17-focal
-            platforms: linux/amd64,linux/arm/v7,linux/arm64
-            tagPrefix: ""
           - variant: java17
             baseImage: eclipse-temurin:17-focal
             platforms: linux/amd64,linux/arm/v7,linux/arm64
@@ -42,6 +37,7 @@ jobs:
             tagPrefix: java11-
     env:
       DOCKER_HUB_ORG: itzg
+      MAIN_VARIANT: java21
     steps:
       - uses: actions/checkout@v4.1.5
 
@@ -52,11 +48,22 @@ jobs:
           images: |
             ${{ env.DOCKER_HUB_ORG }}/bungeecord
           tags: |
-            type=ref,event=branch,prefix=${{ matrix.tagPrefix }}
+            # For the "main" variant, it gets the tag as-is, without suffix
+            type=ref,event=tag,enable=${{ matrix.variant == env.MAIN_VARIANT }}
+            # and each variant (including main one) gets the tag with the variant suffix, such as 2023.1.1-java17
+            type=ref,event=tag,suffix=-${{ matrix.variant }}
+            # latest repo tag gets a moving 'stable' image tag applied to the main variant
+            type=raw,value=stable,enable=${{ github.ref_type == 'tag' && matrix.variant == env.MAIN_VARIANT }}            
+            # apply the variant as a moving tag for most recent commit per variant
+            type=raw,value=${{ matrix.variant }},enable=${{ github.ref_name == github.event.repository.default_branch }}
+            # for building test/* branch images
+            type=ref,event=branch,suffix=-${{ matrix.variant }},enable=${{ github.ref_name != github.event.repository.default_branch }}
+            # legacy tag format of {variant}-{version}
             type=ref,event=tag,prefix=${{ matrix.tagPrefix }}
-            type=raw,value=${{ matrix.variant }}
+          # NOTE this identifies which variant will be published as "latest", which isn't
+          # necessarily the newest version of Java
           flavor: |
-            latest=false
+            latest=${{ matrix.variant == env.MAIN_VARIANT && github.ref_name == github.event.repository.default_branch }}
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3.3.0
