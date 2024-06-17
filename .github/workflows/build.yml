@@ -41,7 +41,7 @@ jobs:
       DOCKER_HUB_ORG: itzg
       MAIN_VARIANT: java21
     steps:
-      - uses: actions/checkout@v4.1.6
+      - uses: actions/checkout@v4.1.7
 
       - name: Docker meta
         id: meta
@@ -82,7 +82,7 @@ jobs:
 
       - name: Build and push
         id: docker_build
-        uses: docker/build-push-action@v5.3.0
+        uses: docker/build-push-action@v5.4.0
         with:
           platforms: ${{ matrix.platforms }}
           # ensure latest base image is used
