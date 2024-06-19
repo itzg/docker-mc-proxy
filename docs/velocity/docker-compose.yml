@@ -9,7 +9,7 @@ services:
     volumes:
       - ./paper-global.yml:/config/paper-global.yml
   proxy:
-    image: itzg/bungeecord
+    image: itzg/mc-proxy
     environment:
       TYPE: VELOCITY
       DEBUG: "false"

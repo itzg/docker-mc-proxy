@@ -49,6 +49,8 @@ jobs:
         with:
           images: |
             ${{ env.DOCKER_HUB_ORG }}/bungeecord
+            ${{ env.DOCKER_HUB_ORG }}/mc-proxy
+            ghcr.io/${{ github.repository_owner }}/mc-proxy
           tags: |
             # For the "main" variant, it gets the tag as-is, without suffix
             type=ref,event=tag,enable=${{ matrix.variant == env.MAIN_VARIANT }}
@@ -79,6 +81,14 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Login to GHCR
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3.2.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
 
       - name: Build and push
         id: docker_build
