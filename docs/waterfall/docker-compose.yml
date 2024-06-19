@@ -6,7 +6,7 @@ services:
       TYPE: PAPER
       ONLINE_MODE: "FALSE"
   proxy:
-    image: itzg/bungeecord
+    image: itzg/mc-proxy
     environment:
       TYPE: WATERFALL
       ENABLE_RCON: "true"

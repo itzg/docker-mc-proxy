@@ -2,7 +2,7 @@ version: "3.8"
 
 services: 
   proxy:
-    image: itzg/bungeecord
+    image: itzg/mc-proxy
     environment:
       TYPE: WATERFALL
     ports:
