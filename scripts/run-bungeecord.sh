@@ -21,6 +21,7 @@
 : "${MODRINTH_PROJECTS:=}"
 : "${MODRINTH_DOWNLOAD_DEPENDENCIES:=required}"
 : "${MODRINTH_ALLOWED_VERSION_TYPE:=release}"
+: "${CUSTOM_FAMILY:=bungeecord}"
 
 BUNGEE_HOME=/server
 RCON_JAR_URL=https://github.com/orblazer/bungee-rcon/releases/download/v${RCON_JAR_VERSION}/bungee-rcon-${RCON_JAR_VERSION}.jar
@@ -295,7 +296,7 @@ case "${TYPE^^}" in
   ;;
 
   CUSTOM)
-    family=bungeecord
+    family=${CUSTOM_FAMILY:-bungeecord}
     if [[ -v BUNGEE_JAR_URL ]]; then
       log "Using custom server jar at ${BUNGEE_JAR_URL} ..."
       BUNGEE_JAR=$BUNGEE_HOME/$(basename ${BUNGEE_JAR_URL})
