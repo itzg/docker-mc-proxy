@@ -3,7 +3,7 @@
 : "${TYPE:=BUNGEECORD}"
 : "${DEBUG:=false}"
 : "${RCON_JAR_VERSION:=1.0.0}"
-: "${RCON_VELOCITY_JAR_VERSION:=1.1}"
+: "${RCON_VELOCITY_JAR_VERSION:=1.2.0}"
 : "${SPIGET_PLUGINS:=}"
 : "${NETWORKADDRESS_CACHE_TTL:=60}"
 : "${INIT_MEMORY:=${MEMORY}}"
@@ -21,10 +21,11 @@
 : "${MODRINTH_PROJECTS:=}"
 : "${MODRINTH_DOWNLOAD_DEPENDENCIES:=required}"
 : "${MODRINTH_ALLOWED_VERSION_TYPE:=release}"
+: "${CUSTOM_FAMILY:=bungeecord}"
 
 BUNGEE_HOME=/server
 RCON_JAR_URL=https://github.com/orblazer/bungee-rcon/releases/download/v${RCON_JAR_VERSION}/bungee-rcon-${RCON_JAR_VERSION}.jar
-RCON_VELOCITY_JAR_URL=https://github.com/UnioDex/VelocityRcon/releases/download/v${RCON_VELOCITY_JAR_VERSION}/VelocityRcon.jar
+RCON_VELOCITY_JAR_URL=https://mvn.tribufu.com/releases/com/tribufu/Tribufu-VelocityRcon/${RCON_VELOCITY_JAR_VERSION}/Tribufu-VelocityRcon-${RCON_VELOCITY_JAR_VERSION}.jar
 download_required=true
 
 set -eo pipefail
@@ -295,7 +296,7 @@ case "${TYPE^^}" in
   ;;
 
   CUSTOM)
-    family=bungeecord
+    family=${CUSTOM_FAMILY:-bungeecord}
     if [[ -v BUNGEE_JAR_URL ]]; then
       log "Using custom server jar at ${BUNGEE_JAR_URL} ..."
       BUNGEE_JAR=$BUNGEE_HOME/$(basename ${BUNGEE_JAR_URL})
@@ -360,6 +361,16 @@ if [[ $pruningPrefix ]]; then
   pruneOlder "$pruningPrefix"
 fi
 
+# Remove old plugins as long as REMOVE_OLD_PLUGINS or REMOVE_OLD_MODS is set to true
+# REMOVE_OLD_MODS is available to be consistent with the docker-minecraft-server image
+# Note that only REMOVE_OLD_MODS_EXCLUDE and REMOVE_OLD_MODS_INCLUDE are supported.
+if isTrue "${REMOVE_OLD_PLUGINS:-false}" || isTrue "${REMOVE_OLD_MODS:-false}"; then
+  log "Removing old plugins including:${REMOVE_OLD_MODS_INCLUDE} excluding:${REMOVE_OLD_MODS_EXCLUDE}"
+  removeOldMods $BUNGEE_HOME/plugins
+  REMOVE_OLD_PLUGINS=false
+  REMOVE_OLD_MODS=false
+fi
+
 if [ -d /plugins ]; then
     log "Copying BungeeCord plugins over..."
     cp -ru /plugins $BUNGEE_HOME
@@ -373,16 +384,6 @@ if [[ "$PLUGINS" ]]; then
           --scope=var-list \
           --to="$BUNGEE_HOME/plugins" \
           "$PLUGINS"
-fi
-
-# Remove old plugins as long as REMOVE_OLD_PLUGINS or REMOVE_OLD_MODS is set to true
-# REMOVE_OLD_MODS is available to be consistent with the docker-minecraft-server image
-# Note that only REMOVE_OLD_MODS_EXCLUDE and REMOVE_OLD_MODS_INCLUDE are supported.
-if isTrue "${REMOVE_OLD_PLUGINS:-false}" || isTrue "${REMOVE_OLD_MODS:-false}"; then
-  log "Removing old plugins including:${REMOVE_OLD_MODS_INCLUDE} excluding:${REMOVE_OLD_MODS_EXCLUDE}"
-  removeOldMods $BUNGEE_HOME/plugins
-  REMOVE_OLD_PLUGINS=false
-  REMOVE_OLD_MODS=false
 fi
 
 # Download plugins from spigotmc and put them in the plugins folder

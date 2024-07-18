@@ -1,13 +1,13 @@
-version: '3.5'
-
 services:
   mc:
     image: itzg/minecraft-server
     environment:
       EULA: "TRUE"
       ONLINE_MODE: "FALSE"
-  bungeecord:
-    image: itzg/bungeecord
+    volumes:
+      - mc-data:/data
+  proxy:
+    image: itzg/mc-proxy
     environment:
       BUNGEE_JAR_REVISION: "1"
       CFG_MOTD: Powered by Docker
@@ -16,7 +16,8 @@ services:
       - "25565:25577"
     volumes:
       - ./config.yml:/config/config.yml
-      - bungeecord:/server
+      - proxy-data:/server
 
 volumes:
-  bungeecord: {}
+  mc-data:
+  proxy-data:

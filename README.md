@@ -1,7 +1,4 @@
-
-This is a Docker image of [BungeeCord](https://www.spigotmc.org/wiki/bungeecord/)
-and is intended to be used at the front-end of a cluster of
-[itzg/minecraft-server](https://hub.docker.com/r/itzg/minecraft-server/) containers.
+This is a Docker image that provides a choice of Minecraft proxies, such as [BungeeCord](https://www.spigotmc.org/wiki/bungeecord/) and [Velocity](https://papermc.io/software/velocity). It is intended to be used in combination with [itzg/minecraft-server](https://hub.docker.com/r/itzg/minecraft-server/) containers.
 
 [![Build and Publish](https://github.com/itzg/docker-bungeecord/actions/workflows/build.yml/badge.svg)](https://github.com/itzg/docker-bungeecord/actions/workflows/build.yml)
 
@@ -14,13 +11,37 @@ you can disable online mode, which is required by bungeecord, by setting `ONLINE
 docker run ... -e ONLINE_MODE=FALSE itzg/minecraft-server
 ```
 
-[Here](docs/docker-compose.yml) is an example Docker Compose file.
+The following is an example that can be started with `docker compose up -d`:
+
+```yaml
+services:
+  mc:
+    image: itzg/minecraft-server
+    environment:
+      EULA: "TRUE"
+      ONLINE_MODE: "FALSE"
+    volumes:
+      - mc-data:/data
+  proxy:
+    image: itzg/mc-proxy
+    environment:
+      BUNGEE_JAR_REVISION: "1"
+      CFG_MOTD: Powered by Docker
+      REPLACE_ENV_VARIABLES: "true"
+    ports:
+      - "25565:25577"
+    volumes:
+      - ./config.yml:/config/config.yml
+      - proxy-data:/server
+
+volumes:
+  mc-data:
+  proxy-data:
+```
 
 ## Healthcheck
 
-This image contains [mc-monitor](https://github.com/itzg/mc-monitor) and uses
-its `status` command to continually check on the container's. That can be observed
-from the `STATUS` column of `docker ps`
+This image contains [mc-monitor](https://github.com/itzg/mc-monitor) and uses its `status` command to continually check on the container's. That can be observed from the `STATUS` column of `docker ps`
 
 ```
 CONTAINER ID    IMAGE    COMMAND                         CREATED           STATUS                     PORTS                       NAMES
@@ -112,7 +133,7 @@ healthy
 
   Enable the rcon server (uses a third-party plugin to work).
   - [orblazer/bungee-rcon](https://github.com/orblazer/bungee-rcon) for `BUNGEECORD`, `WATERFALL`, and `CUSTOM`
-  - [UnioDex/VelocityRcon](https://github.com/UnioDex/VelocityRcon) for `VELOCITY`
+  - [TribuFuForks/VelocityRcon](https://github.com/TribufuForks/VelocityRcon) for `VELOCITY`
 
 * **RCON_PORT**
 
@@ -241,7 +262,7 @@ _The `-i` is not needed in this case._
 
 In order to attach and interact with the Bungeecord server, add `-it` when starting the container, such as
 
-    docker run -d -it -p 25565:25577 --name mc itzg/bungeecord
+    docker run -d -it -p 25565:25577 --name mc itzg/mc-proxy
 
 With that you can attach and interact at any time using
 
@@ -312,7 +333,7 @@ version: "3.8"
 
 services:
   proxy:
-    image: itzg/bungeecord
+    image: itzg/mc-proxy
     ports:
       - "25577:25577"
     volumes:
@@ -395,7 +416,7 @@ Supports the file formats:
 This image may be run as a non-root user but does require an attached `/server`
 volume that is writable by that uid, such as:
 
-    docker run ... -u $uid -v $(pwd)/data:/server itzg/bungeecord
+    docker run ... -u $uid -v $(pwd)/data:/server itzg/mc-proxy
 
 ## Java Versions
 
@@ -403,11 +424,11 @@ The `latest` image tag is based on Java 21, but alternate image tags are availab
 
 The image Java variant can be used as shown here:
 
-    itzg/bungeecord:{variant}
+    itzg/mc-proxy:{variant}
 
 or using release version, such as `2024.5.0`
 
-    itzg/bungeecord:{release}-{variant}
+    itzg/mc-proxy:{release}-{variant}
 
 | Variant | Java Version | CPU types         |
 |---------|--------------|-------------------|
