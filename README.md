@@ -127,6 +127,8 @@ healthy
   ```
   Also, a specific version/type can be declared using colon symbol and version id/type after the project slug. The version id can be found in the 'Metadata' section. Valid version types are `release`, `beta`, `alpha`.
 
+  Dependency resolution can be adjusted by setting `MODRINTH_DOWNLOAD_DEPENDENCIES` to `none`, `optional`, or `required` (the default).
+
   **NOTE** The variable `MINECRAFT_VERSION` must be set to the corresponding Minecraft version. 
 
 * **ENABLE_RCON**
