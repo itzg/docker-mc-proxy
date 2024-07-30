@@ -1,23 +1,14 @@
-ARG BASE_IMAGE=eclipse-temurin:17
+ARG BASE_IMAGE=eclipse-temurin:21-jre
 FROM ${BASE_IMAGE}
 
 VOLUME ["/server"]
 WORKDIR /server
 
-RUN apt-get update \
-  && DEBIAN_FRONTEND=noninteractive \
-  apt-get install -y \
-    sudo \
-    net-tools \
-    curl \
-    tzdata \
-    nano \
-    unzip \
-    imagemagick \
-  && apt-get clean
+RUN --mount=target=/build,source=build \
+    /build/install-packages.sh
 
-RUN addgroup --gid 1000 bungeecord \
-  && adduser --system --shell /bin/false --uid 1000 --ingroup bungeecord --home /server bungeecord
+RUN --mount=target=/build,source=build \
+    /build/setup-user.sh
 
 # hook into docker BuildKit --platform support
 # see https://docs.docker.com/engine/reference/builder/#automatic-platform-args-in-the-global-scope
