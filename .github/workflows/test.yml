@@ -30,7 +30,7 @@ jobs:
 
       - name: Build
         id: docker_build
-        uses: docker/build-push-action@v6.6.1
+        uses: docker/build-push-action@v6.7.0
         with:
           platforms: ${{ matrix.platforms }}
           # ensure latest base image is used
