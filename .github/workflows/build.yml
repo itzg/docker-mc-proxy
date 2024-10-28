@@ -41,7 +41,7 @@ jobs:
       DOCKER_HUB_ORG: itzg
       MAIN_VARIANT: java21
     steps:
-      - uses: actions/checkout@v4.2.1
+      - uses: actions/checkout@v4.2.2
 
       - name: Docker meta
         id: meta
