@@ -103,6 +103,23 @@ healthy
   -e PLUGINS=https://www.example.com/plugin1.jar,https://www.example.com/plugin2.jar
   ```
 
+* **PLUGINS_FILE**
+
+  An alternative to `PLUGINS`. This variable `PLUGINS_FILE` can be set with the container path or URL of a text file listing a mod/plugin URLs on each line. For example, the following
+
+  ```
+  -e PLUGINS_FILE=/extras/plugins.txt
+  ```
+  would load a file in the container at `/extras/plugins.txt`. The file might look like:
+
+  ```
+  https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/bungeecord
+  # This line will be ignored
+  https://download.luckperms.net/1567/bungee/loader/LuckPerms-Bungee-5.4.150.jar
+  ```
+
+  It works exactly the same as [Mod/Plugin URL Listing File for itzg/minecraft-server](https://docker-minecraft-server.readthedocs.io/en/latest/mods-and-plugins/#modsplugins-list).
+
 * **SPIGET_PLUGINS**
 
   The `SPIGET_PLUGINS` variable can be set with a comma-separated list of SpigotMC resource IDs to automatically download [SpigotMC plugins](https://www.spigotmc.org/resources/) using [the spiget API](https://spiget.org/). Resources that are zip files will be expanded into the plugins directory and resources that are simply jar files will be moved there.

@@ -386,6 +386,15 @@ if [[ "$PLUGINS" ]]; then
           "$PLUGINS"
 fi
 
+if [[ "$PLUGINS_FILE" ]]; then
+ mkdir -p "$BUNGEE_HOME/plugins"
+ mc-image-helper mcopy \
+          --file-is-listing \
+          --scope=file-list \
+          --to="$BUNGEE_HOME/plugins" \
+          "$PLUGINS_FILE"
+fi
+
 # Download plugins from spigotmc and put them in the plugins folder
 if [[ ${SPIGET_PLUGINS} ]]; then
   log "Getting plugins via Spiget"
