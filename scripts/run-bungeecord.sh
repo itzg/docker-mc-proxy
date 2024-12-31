@@ -237,29 +237,29 @@ function getFromPaperMc() {
   local version=${2?}
   local buildId=${3?}
 
-  # Doc : https://papermc.io/api
+  # Doc : https://api.papermc.io/
 
   if [[ ${version^^} = LATEST ]]; then
-    if ! version=$(get --json-path=".versions[-1]" "https://papermc.io/api/v2/projects/${project}"); then
+    if ! version=$(get --json-path=".versions[-1]" "https://api.papermc.io/v2/projects/${project}"); then
       echo "ERROR: failed to lookup PaperMC versions"
       exit 1
     fi
   fi
 
   if [[ ${buildId^^} = LATEST ]]; then
-    if ! buildId=$(get --json-path=".builds[-1]" "https://papermc.io/api/v2/projects/${project}/versions/${version}"); then
+    if ! buildId=$(get --json-path=".builds[-1]" "https://api.papermc.io/v2/projects/${project}/versions/${version}"); then
         echo "ERROR: failed to lookup PaperMC build from version ${version}"
         exit 1
     fi
   fi
 
 
-  if ! jar=$(get --json-path=".downloads.application.name" "https://papermc.io/api/v2/projects/${project}/versions/${version}/builds/${buildId}"); then
+  if ! jar=$(get --json-path=".downloads.application.name" "https://api.papermc.io/v2/projects/${project}/versions/${version}/builds/${buildId}"); then
     echo "ERROR: failed to lookup PaperMC download file from version=${version} build=${buildId}"
     exit 1
   fi
 
-  BUNGEE_JAR_URL="https://papermc.io/api/v2/projects/${project}/versions/${version}/builds/${buildId}/downloads/${jar}"
+  BUNGEE_JAR_URL="https://api.papermc.io/v2/projects/${project}/versions/${version}/builds/${buildId}/downloads/${jar}"
   BUNGEE_JAR=$BUNGEE_HOME/${BUNGEE_JAR:=${project}-${version}-${buildId}.jar}
 }
 
