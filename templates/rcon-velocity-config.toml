@@ -1,3 +1,4 @@
+rcon-host = "0.0.0.0"
 rcon-port = "${PORT}"
 rcon-password = "${PASSWORD}"
 rcon-colored = false
