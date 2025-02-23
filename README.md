@@ -242,12 +242,18 @@ healthy
 
 * **25577**
 
-  The listening port of BungeeCord, which you will typically want to port map
+  The default listening port of BungeeCord and Waterfall, which you will typically want to port map
   to the standard Minecraft server port of 25565 using:
 
   ```
   -p 25565:25577
   ```
+
+* **25565**
+
+  The default listening port of Velocity; however, [the example](docs/velocity/docker-compose.yml) shows that can be altered by setting `bind` in `velocity.toml` to "localhost:25577" to match BungeeCord/Waterfall.
+
+The health check will try to determine the correct port to check based upon the type and configuration; however, you can always set the environment variable `SERVER_PORT` to force a specific port to evaluate.
 
 ## Java Versions
 
