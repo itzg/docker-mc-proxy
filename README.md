@@ -263,7 +263,7 @@ The following table shows the Java versions and CPU architectures supported by t
 |--------|------|---------------------|
 | latest | 17   | amd64, arm64, armv7 |
 | java8  | 8    | amd64, arm64, armv7 |
-| java24 | 24   | amd64, arm64, armv7 |
+| java24 | 24   | amd64, arm64        |
 
 ### Deprecated image tags
 

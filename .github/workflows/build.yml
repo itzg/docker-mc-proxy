@@ -23,7 +23,7 @@ jobs:
         include:
           - variant: java24
             baseImage: eclipse-temurin:24-jre
-            platforms: linux/amd64,linux/arm/v7,linux/arm64
+            platforms: linux/amd64,linux/arm64
             tagPrefix: java24-
           - variant: java21
             baseImage: eclipse-temurin:21-jre
