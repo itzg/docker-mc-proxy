@@ -254,7 +254,7 @@ function getFromPaperMc() {
   fi
 
 
-  if ! jar=$(get --json-path=".downloads.application.name" "https://api.papermc.io/v2/projects/${project}/versions/${version}/builds/${buildId}"); then
+  if ! jar=$(get --json-path=".downloads.application.name" "https://api.papermc.io/v2/projects/${project}/versions/${version}/builds/${buildId}/"); then
     echo "ERROR: failed to lookup PaperMC download file from version=${version} build=${buildId}"
     exit 1
   fi
