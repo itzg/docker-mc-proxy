@@ -237,30 +237,21 @@ function getFromPaperMc() {
   local version=${2?}
   local buildId=${3?}
 
-  # Doc : https://api.papermc.io/
-
-  if [[ ${version^^} = LATEST ]]; then
-    if ! version=$(get --json-path=".versions[-1]" "https://api.papermc.io/v2/projects/${project}"); then
-      echo "ERROR: failed to lookup PaperMC versions"
-      exit 1
-    fi
+  args=(--results-file .results.env)
+  if [[ ${version^^} != LATEST ]]; then
+    args+=(--version "$version")
+  fi
+  if [[ ${buildId^^} != LATEST ]]; then
+    args+=(--build "$buildId")
   fi
 
-  if [[ ${buildId^^} = LATEST ]]; then
-    if ! buildId=$(get --json-path=".builds[-1]" "https://api.papermc.io/v2/projects/${project}/versions/${version}"); then
-        echo "ERROR: failed to lookup PaperMC build from version ${version}"
-        exit 1
-    fi
-  fi
-
-
-  if ! jar=$(get --json-path=".downloads.application.name" "https://api.papermc.io/v2/projects/${project}/versions/${version}/builds/${buildId}"); then
-    echo "ERROR: failed to lookup PaperMC download file from version=${version} build=${buildId}"
+  if ! mc-image-helper install-paper --project "$project" "${args[@]}"; then
+    echo "ERROR: failed to download"
     exit 1
   fi
 
-  BUNGEE_JAR_URL="https://api.papermc.io/v2/projects/${project}/versions/${version}/builds/${buildId}/downloads/${jar}"
-  BUNGEE_JAR=$BUNGEE_HOME/${BUNGEE_JAR:=${project}-${version}-${buildId}.jar}
+  source .results.env
+  BUNGEE_JAR="$SERVER"
 }
 
 ### MAIN
@@ -285,13 +276,15 @@ case "${TYPE^^}" in
 
   WATERFALL)
     getFromPaperMc waterfall "${WATERFALL_VERSION:-latest}" "${WATERFALL_BUILD_ID:-latest}"
-    pruningPrefix=waterfall
+    # downloaded by getFromPaperMc
+    download_required=false
     family=bungeecord
  ;;
 
   VELOCITY)
     getFromPaperMc velocity "${VELOCITY_VERSION:-latest}" "${VELOCITY_BUILD_ID:-latest}"
-    pruningPrefix=velocity
+    # downloaded by getFromPaperMc
+    download_required=false
     family=velocity
   ;;
 
