@@ -45,7 +45,7 @@ jobs:
 
       - name: Docker meta
         id: meta
-        uses: docker/metadata-action@v5.7.0
+        uses: docker/metadata-action@v5.8.0
         with:
           images: |
             ${{ env.DOCKER_HUB_ORG }}/bungeecord
