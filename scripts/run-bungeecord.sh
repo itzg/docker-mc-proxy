@@ -344,6 +344,18 @@ if [[ $DOWNLOAD_DEFAULTS ]]; then
   fi
 fi
 
+if [[ "${family}" == "velocity" ]]; then
+  SECRET_FILE="/server/forwarding.secret"
+
+  if [ ! -f "$SECRET_FILE" ]; then
+    # generate 32 random alphanumeric characters
+    head /dev/urandom | tr -dc 'A-Za-z0-9' | head -c 32 > "$SECRET_FILE"
+    log "Created $SECRET_FILE"
+  else
+    log "$SECRET_FILE already exists"
+  fi
+fi
+
 if [ -n "$ICON" ]; then
     if [ ! -e server-icon.png ] || isTrue "${OVERRIDE_ICON}"; then
       log "Using server icon from $ICON..."
