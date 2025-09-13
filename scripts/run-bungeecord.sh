@@ -22,6 +22,7 @@
 : "${MODRINTH_DOWNLOAD_DEPENDENCIES:=required}"
 : "${MODRINTH_ALLOWED_VERSION_TYPE:=release}"
 : "${CUSTOM_FAMILY:=bungeecord}"
+: "${SKIP_DOWNLOAD_DEFAULTS:=false}"
 : "${DEFAULT_CONFIG_REPO:=https://raw.githubusercontent.com/Shonz1/minecraft-default-configs/main}"
 
 BUNGEE_HOME=/server
@@ -46,6 +47,17 @@ function isTrue() {
   esac
 
   return ${result}
+}
+
+function isFalse() {
+  case "${1,,}" in
+  false | no | off | 0)
+    return 0
+    ;;
+  *)
+    return 1
+    ;;
+  esac
 }
 
 function isDebugging() {
@@ -334,25 +346,27 @@ if isTrue "$download_required"; then
   fi
 fi
 
-if [[ $DOWNLOAD_DEFAULTS ]]; then
-  log "Downloading default top-level configs, if needed"
-  if ! mc-image-helper mcopy \
-    --to /server \
-    --skip-existing --skip-up-to-date=false \
-    "$DOWNLOAD_DEFAULTS" 2> /dev/null; then
-    logWarning "One or more default files were not available from $DOWNLOAD_DEFAULTS"
+if isFalse "$SKIP_DOWNLOAD_DEFAULTS"; then
+  if [[ $DOWNLOAD_DEFAULTS ]]; then
+    log "Downloading default top-level configs, if needed"
+    if ! mc-image-helper mcopy \
+      --to /server \
+      --skip-existing --skip-up-to-date=false \
+      "$DOWNLOAD_DEFAULTS" 2> /dev/null; then
+      logWarning "One or more default files were not available from $DOWNLOAD_DEFAULTS"
+    fi
   fi
-fi
 
-if [[ "${family}" == "velocity" ]]; then
-  SECRET_FILE="/server/forwarding.secret"
+  if [[ "${family}" == "velocity" ]]; then
+    SECRET_FILE="/server/forwarding.secret"
 
-  if [ ! -f "$SECRET_FILE" ]; then
-    # generate 32 random alphanumeric characters
-    head /dev/urandom | tr -dc 'A-Za-z0-9' | head -c 32 > "$SECRET_FILE"
-    log "Created $SECRET_FILE"
-  else
-    log "$SECRET_FILE already exists"
+    if [ ! -f "$SECRET_FILE" ]; then
+      # generate 32 random alphanumeric characters
+      head /dev/urandom | tr -dc 'A-Za-z0-9' | head -c 32 > "$SECRET_FILE"
+      log "Created $SECRET_FILE"
+    else
+      log "$SECRET_FILE already exists"
+    fi
   fi
 fi
 
