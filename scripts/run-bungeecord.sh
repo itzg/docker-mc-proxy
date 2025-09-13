@@ -22,6 +22,8 @@
 : "${MODRINTH_DOWNLOAD_DEPENDENCIES:=required}"
 : "${MODRINTH_ALLOWED_VERSION_TYPE:=release}"
 : "${CUSTOM_FAMILY:=bungeecord}"
+: "${SKIP_DOWNLOAD_DEFAULTS:=false}"
+: "${DEFAULT_CONFIG_REPO:=https://raw.githubusercontent.com/Shonz1/minecraft-default-configs/main}"
 
 BUNGEE_HOME=/server
 RCON_JAR_URL=https://github.com/orblazer/bungee-rcon/releases/download/v${RCON_JAR_VERSION}/bungee-rcon-${RCON_JAR_VERSION}.jar
@@ -45,6 +47,17 @@ function isTrue() {
   esac
 
   return ${result}
+}
+
+function isFalse() {
+  case "${1,,}" in
+  false | no | off | 0)
+    return 0
+    ;;
+  *)
+    return 1
+    ;;
+  esac
 }
 
 function isDebugging() {
@@ -254,6 +267,20 @@ function getFromPaperMc() {
   BUNGEE_JAR="$SERVER"
 }
 
+function buildDownloadList() {
+  repoUrl=${1?}
+  version=${2?}
+  shift 2
+  result=
+  for c in "${@}"; do
+    if [[ $result ]]; then
+      result+=","
+    fi
+    result+="${repoUrl}/${version}/$c"
+  done
+  echo "$result"
+}
+
 ### MAIN
 
 handleDebugMode
@@ -272,6 +299,7 @@ case "${TYPE^^}" in
     BUNGEE_JAR=$BUNGEE_HOME/${BUNGEE_JAR:=BungeeCord-${BUNGEE_JAR_REVISION}.jar}
     pruningPrefix=BungeeCord
     family=bungeecord
+    DOWNLOAD_DEFAULTS=$(buildDownloadList "$DEFAULT_CONFIG_REPO" "bungeecord" "config.yml")
   ;;
 
   WATERFALL)
@@ -279,6 +307,7 @@ case "${TYPE^^}" in
     # downloaded by getFromPaperMc
     download_required=false
     family=bungeecord
+    DOWNLOAD_DEFAULTS=$(buildDownloadList "$DEFAULT_CONFIG_REPO" "waterfall" "config.yml" "waterfall.yml")
  ;;
 
   VELOCITY)
@@ -286,6 +315,7 @@ case "${TYPE^^}" in
     # downloaded by getFromPaperMc
     download_required=false
     family=velocity
+    DOWNLOAD_DEFAULTS=$(buildDownloadList "$DEFAULT_CONFIG_REPO" "velocity" "velocity.toml")
   ;;
 
   CUSTOM)
@@ -313,6 +343,30 @@ if isTrue "$download_required"; then
   if ! get -o "$BUNGEE_JAR" --skip-up-to-date --log-progress-each "$BUNGEE_JAR_URL"; then
       echo "ERROR: failed to download" >&2
       exit 2
+  fi
+fi
+
+if isFalse "$SKIP_DOWNLOAD_DEFAULTS"; then
+  if [[ $DOWNLOAD_DEFAULTS ]]; then
+    log "Downloading default top-level configs, if needed"
+    if ! mc-image-helper mcopy \
+      --to /server \
+      --skip-existing --skip-up-to-date=false \
+      "$DOWNLOAD_DEFAULTS" 2> /dev/null; then
+      logWarning "One or more default files were not available from $DOWNLOAD_DEFAULTS"
+    fi
+  fi
+
+  if [[ "${family}" == "velocity" ]]; then
+    SECRET_FILE="/server/forwarding.secret"
+
+    if [ ! -f "$SECRET_FILE" ]; then
+      # generate 32 random alphanumeric characters
+      head /dev/urandom | tr -dc 'A-Za-z0-9' | head -c 32 > "$SECRET_FILE"
+      log "Created $SECRET_FILE"
+    else
+      log "$SECRET_FILE already exists"
+    fi
   fi
 fi
 
