@@ -218,6 +218,8 @@ function processConfigs {
       fi
   fi
 
+  downloadDefaultConfigs
+
   # Replace environment variables in config files
   if isTrue "${REPLACE_ENV_VARIABLES}"; then
     log "Replacing env variables in configs that match the prefix $REPLACE_ENV_VARIABLE_PREFIX..."
@@ -279,6 +281,32 @@ function buildDownloadList() {
     result+="${repoUrl}/${version}/$c"
   done
   echo "$result"
+}
+
+function downloadDefaultConfigs() {
+  if isFalse "$SKIP_DOWNLOAD_DEFAULTS"; then
+    if [[ $DOWNLOAD_DEFAULTS ]]; then
+      log "Downloading default top-level configs, if needed"
+      if ! mc-image-helper mcopy \
+        --to /server \
+        --skip-existing --skip-up-to-date=false \
+        "$DOWNLOAD_DEFAULTS" 2> /dev/null; then
+        logWarning "One or more default files were not available from $DOWNLOAD_DEFAULTS"
+      fi
+    fi
+
+    if [[ "${family}" == "velocity" ]]; then
+      SECRET_FILE="/server/forwarding.secret"
+
+      if [ ! -f "$SECRET_FILE" ]; then
+        # generate 32 random alphanumeric characters
+        head /dev/urandom | tr -dc 'A-Za-z0-9' | head -c 32 > "$SECRET_FILE"
+        log "Created $SECRET_FILE"
+      else
+        log "$SECRET_FILE already exists"
+      fi
+    fi
+  fi
 }
 
 ### MAIN
@@ -343,30 +371,6 @@ if isTrue "$download_required"; then
   if ! get -o "$BUNGEE_JAR" --skip-up-to-date --log-progress-each "$BUNGEE_JAR_URL"; then
       echo "ERROR: failed to download" >&2
       exit 2
-  fi
-fi
-
-if isFalse "$SKIP_DOWNLOAD_DEFAULTS"; then
-  if [[ $DOWNLOAD_DEFAULTS ]]; then
-    log "Downloading default top-level configs, if needed"
-    if ! mc-image-helper mcopy \
-      --to /server \
-      --skip-existing --skip-up-to-date=false \
-      "$DOWNLOAD_DEFAULTS" 2> /dev/null; then
-      logWarning "One or more default files were not available from $DOWNLOAD_DEFAULTS"
-    fi
-  fi
-
-  if [[ "${family}" == "velocity" ]]; then
-    SECRET_FILE="/server/forwarding.secret"
-
-    if [ ! -f "$SECRET_FILE" ]; then
-      # generate 32 random alphanumeric characters
-      head /dev/urandom | tr -dc 'A-Za-z0-9' | head -c 32 > "$SECRET_FILE"
-      log "Created $SECRET_FILE"
-    else
-      log "$SECRET_FILE already exists"
-    fi
   fi
 fi
 
