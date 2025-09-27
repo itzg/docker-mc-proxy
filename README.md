@@ -263,13 +263,14 @@ The following table shows the Java versions and CPU architectures supported by t
 |--------|------|---------------------|
 | latest | 17   | amd64, arm64, armv7 |
 | java8  | 8    | amd64, arm64, armv7 |
-| java24 | 24   | amd64, arm64        |
+| java25 | 25   | amd64, arm64        |
 
 ### Deprecated image tags
 
 The following image tags are deprecated. They are still available from Docker Hub but no longer received updates.
 
 - java11
+- java24
 
 ## Interacting with the server
 

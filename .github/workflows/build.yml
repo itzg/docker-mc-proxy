@@ -17,14 +17,14 @@ jobs:
       matrix:
         variant:
           - java21
-          - java24
+          - java25
           - java17
           - java8
         include:
-          - variant: java24
-            baseImage: eclipse-temurin:24-jre
+          - variant: java25
+            baseImage: eclipse-temurin:25-jre
             platforms: linux/amd64,linux/arm64
-            tagPrefix: java24-
+            tagPrefix: java25-
           - variant: java21
             baseImage: eclipse-temurin:21-jre
             platforms: linux/amd64,linux/arm64
