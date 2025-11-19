@@ -291,7 +291,7 @@ function downloadDefaultConfigs() {
         --to /server \
         --skip-existing --skip-up-to-date=false \
         "$DOWNLOAD_DEFAULTS" 2> /dev/null; then
-        logWarning "One or more default files were not available from $DOWNLOAD_DEFAULTS"
+        log "WARN: One or more default files were not available from $DOWNLOAD_DEFAULTS"
       fi
     fi
 
