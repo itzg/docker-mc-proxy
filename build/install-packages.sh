@@ -14,4 +14,4 @@ DEBIAN_FRONTEND=noninteractive \
     unzip \
     imagemagick
 
-apt-get clean
+rm -rf /var/lib/apt/lists/*
