@@ -59,7 +59,9 @@ healthy
 
 * **TYPE**=BUNGEECORD
 
-  The type of the server. When the type is set to `CUSTOM`, the environment setting `BUNGEE_JAR_URL` is required.
+  The type of the server. 
+* 
+* When the type is set to `CUSTOM`, the environment setting `BUNGEE_JAR_URL` is required. `CUSTOM_FAMILY` must also be set of `bungeecord` (default), `velocity`, or `waterfall`. 
 
   Possible values: 
   - [`BUNGEECORD`](https://www.spigotmc.org/wiki/bungeecord/)
