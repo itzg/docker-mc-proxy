@@ -154,7 +154,7 @@ healthy
 
   Enable the rcon server (uses a third-party plugin to work).
   - [orblazer/bungee-rcon](https://github.com/orblazer/bungee-rcon) for `BUNGEECORD`, `WATERFALL`, and `CUSTOM`
-  - [TribuFuForks/VelocityRcon](https://github.com/TribufuForks/VelocityRcon) for `VELOCITY`
+  - [code-lime/Velocircon](https://github.com/code-lime/Velocircon) for `VELOCITY`
 
 * **RCON_PORT**
 

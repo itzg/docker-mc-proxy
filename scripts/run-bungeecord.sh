@@ -3,7 +3,7 @@
 : "${TYPE:=BUNGEECORD}"
 : "${DEBUG:=false}"
 : "${RCON_JAR_VERSION:=1.0.0}"
-: "${RCON_VELOCITY_JAR_VERSION:=1.2.0}"
+: "${RCON_VELOCITY_JAR_VERSION:=1.0.6}"
 : "${SPIGET_PLUGINS:=}"
 : "${NETWORKADDRESS_CACHE_TTL:=60}"
 : "${INIT_MEMORY:=${MEMORY}}"
@@ -27,7 +27,7 @@
 
 BUNGEE_HOME=/server
 RCON_JAR_URL=https://github.com/orblazer/bungee-rcon/releases/download/v${RCON_JAR_VERSION}/bungee-rcon-${RCON_JAR_VERSION}.jar
-RCON_VELOCITY_JAR_URL=https://mvn.tribufu.com/releases/com/tribufu/Tribufu-VelocityRcon/${RCON_VELOCITY_JAR_VERSION}/Tribufu-VelocityRcon-${RCON_VELOCITY_JAR_VERSION}.jar
+RCON_VELOCITY_JAR_URL=https://github.com/code-lime/Velocircon/releases/download/${RCON_VELOCITY_JAR_VERSION}/Velocircon-${RCON_VELOCITY_JAR_VERSION}.jar
 download_required=true
 
 set -eo pipefail
@@ -471,7 +471,7 @@ if [[ $MODRINTH_PROJECTS ]]; then
 fi
 
 # Download rcon plugin
-if [[ "${family}" == "velocity" ]] || isTrue "${APPLY_VELOCITY_RCON:-false}"; then # Download UnioDex/VelocityRcon plugin
+if [[ "${family}" == "velocity" ]] || isTrue "${APPLY_VELOCITY_RCON:-false}"; then # Download code-lime/Velocircon plugin
   if isTrue "${ENABLE_RCON}"; then
     log "Downloading Velocity rcon plugin"
 
@@ -482,9 +482,9 @@ if [[ "${family}" == "velocity" ]] || isTrue "${APPLY_VELOCITY_RCON:-false}"; th
     fi
 
     log "Copy Velocity rcon configuration"
-    mkdir -p $BUNGEE_HOME/plugins/velocityrcon
+    mkdir -p $BUNGEE_HOME/plugins/velocircon
     sed -e 's#${PORT}#'"$RCON_PORT"'#g' -e 's#${PASSWORD}#'"$RCON_PASSWORD"'#g' \
-      /templates/rcon-velocity-config.toml > "$BUNGEE_HOME/plugins/velocityrcon/rcon.toml"
+      /templates/rcon-velocity-config.yml > "$BUNGEE_HOME/plugins/velocircon/rcon.yml"
   fi
 
 # Download orblazer/bungee-rcon plugin
