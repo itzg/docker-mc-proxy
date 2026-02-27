@@ -475,16 +475,21 @@ if [[ "${family}" == "velocity" ]] || isTrue "${APPLY_VELOCITY_RCON:-false}"; th
   if isTrue "${ENABLE_RCON}"; then
     log "Downloading Velocity rcon plugin"
 
-    mkdir -p "$BUNGEE_HOME/plugins"
+    mkdir -p "$BUNGEE_HOME/plugins/velocircon"
     if ! get -o "$BUNGEE_HOME/plugins" --skip-up-to-date --log-progress-each "$RCON_VELOCITY_JAR_URL"; then
       echo "ERROR: failed to download from $RCON_VELOCITY_JAR_URL"
       exit 1
     fi
 
-    log "Copy Velocity rcon configuration"
-    mkdir -p $BUNGEE_HOME/plugins/velocircon
-    sed -e 's#${PORT}#'"$RCON_PORT"'#g' -e 's#${PASSWORD}#'"$RCON_PASSWORD"'#g' \
-      /templates/rcon-velocity-config.yml > "$BUNGEE_HOME/plugins/velocircon/rcon.yml"
+    configFile="$BUNGEE_HOME/plugins/velocircon/rcon.yml"
+    if [ ! -e "$configFile" ]; then
+      log "Copy Velocity rcon configuration"
+       # shellcheck disable=SC2016
+      sed \
+        -e 's#${PORT}#'"$RCON_PORT"'#g' \
+        -e 's#${PASSWORD}#'"$RCON_PASSWORD"'#g' \
+        /templates/rcon-velocity-config.yml > "$configFile"
+    fi
   fi
 
 # Download orblazer/bungee-rcon plugin
