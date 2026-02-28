@@ -36,7 +36,7 @@ RUN easy-add --var os=${TARGETOS} --var arch=${TARGETARCH}${TARGETVARIANT} \
 
 COPY templates/ /templates/
 
-ARG MC_HELPER_VERSION=1.54.1
+ARG MC_HELPER_VERSION=1.55.2
 ARG MC_HELPER_BASE_URL=${GITHUB_BASEURL}/itzg/mc-image-helper/releases/download/${MC_HELPER_VERSION}
 # used for cache busting local copy of mc-image-helper
 ARG MC_HELPER_REV=1

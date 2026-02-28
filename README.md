@@ -135,6 +135,20 @@ healthy
                                                        ===
   ```
 
+* **DOWNLOAD_EXTRA_CONFIGS**
+
+  Additional configuration files or other resources can be fetched automatically before the server starts by setting this variable.  Each entry uses the form `destination<source_url` and multiple entries are separated by commas.  Paths are relative to `/server` inside the container, so `plugins/xyz` means `/server/plugins/xyz` will be written.
+
+  The helper skips files that already exist and will update them if the remote copy is newer.  This is intended for files you wish to patch or modify during startup.
+
+  Example:
+
+  ```bash
+  -e DOWNLOAD_EXTRA_CONFIGS="plugins/WorldEdit<https://example.com/worldedit.yml,config<https://example.com/another.yml"
+  ```
+
+
+
 * **MODRINTH_PROJECTS**
 
   Comma or newline separated list of project slugs (short name) or IDs. The project ID is located in the "Technical information" section. The slug is the part of the page URL that follows `/mod/`:

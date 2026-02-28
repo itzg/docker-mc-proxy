@@ -23,6 +23,7 @@
 : "${MODRINTH_ALLOWED_VERSION_TYPE:=release}"
 : "${CUSTOM_FAMILY:=bungeecord}"
 : "${SKIP_DOWNLOAD_DEFAULTS:=false}"
+: "${DOWNLOAD_EXTRA_CONFIGS:=}"
 : "${DEFAULT_CONFIG_REPO:=https://raw.githubusercontent.com/Shonz1/minecraft-default-configs/main}"
 
 BUNGEE_HOME=/server
@@ -294,18 +295,32 @@ function downloadDefaultConfigs() {
         log "WARN: One or more default files were not available from $DOWNLOAD_DEFAULTS"
       fi
     fi
+  fi
 
-    if [[ "${family}" == "velocity" ]]; then
-      SECRET_FILE="/server/forwarding.secret"
+  if [[ "${family}" == "velocity" ]]; then
+    SECRET_FILE="/server/forwarding.secret"
 
-      if [ ! -f "$SECRET_FILE" ]; then
-        # generate 32 random alphanumeric characters
-        head /dev/urandom | tr -dc 'A-Za-z0-9' | head -c 32 > "$SECRET_FILE"
-        log "Created $SECRET_FILE"
-      else
-        log "$SECRET_FILE already exists"
-      fi
+    if [ ! -f "$SECRET_FILE" ]; then
+      # generate 32 random alphanumeric characters
+      head /dev/urandom | tr -dc 'A-Za-z0-9' | head -c 32 > "$SECRET_FILE"
+      log "Created $SECRET_FILE"
+    else
+      log "$SECRET_FILE already exists"
     fi
+  fi
+  
+  # Download any extra configs specified by the user.  The format is
+  # destination<url[,destination2<url2,...] and behaves similarly to
+  # DOWNLOAD_DEFAULTS except that files are always copied relative to
+  # the server directory.
+  if [[ $DOWNLOAD_EXTRA_CONFIGS ]]; then
+    log "Downloading extra configuration files"
+    mc-image-helper mcopy \
+      --to /server \
+      --skip-existing \
+      --skip-up-to-date=false \
+      --quiet-when-skipped \
+      "$DOWNLOAD_EXTRA_CONFIGS"
   fi
 }
 
