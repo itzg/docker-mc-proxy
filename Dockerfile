@@ -25,7 +25,7 @@ ADD ${GITHUB_BASEURL}/itzg/easy-add/releases/download/${EASY_ADD_VERSION}/easy-a
 RUN chmod +x /usr/bin/easy-add
 
 # renovate: datasource=github-releases packageName=itzg/mc-monitor
-ARG MC_MONITOR_VERSION=0.15.3
+ARG MC_MONITOR_VERSION=0.16.1
 RUN easy-add --var os=${TARGETOS} --var arch=${TARGETARCH}${TARGETVARIANT} \
   --var version=${MC_MONITOR_VERSION} --var app=mc-monitor --file {{.app}} \
   --from ${GITHUB_BASEURL}/itzg/{{.app}}/releases/download/{{.version}}/{{.app}}_{{.version}}_{{.os}}_{{.arch}}.tar.gz
