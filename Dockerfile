@@ -1,4 +1,5 @@
-ARG BASE_IMAGE=eclipse-temurin:21-jre
+# fixed to -noble (fixes #316)
+ARG BASE_IMAGE=eclipse-temurin:21-jre-noble
 FROM ${BASE_IMAGE}
 
 VOLUME ["/server"]
