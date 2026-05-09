@@ -59,19 +59,15 @@ healthy
 
 * **TYPE**=BUNGEECORD
 
-  The type of the server. 
-* 
-* When the type is set to `CUSTOM`, the environment setting `BUNGEE_JAR_URL` is required. `CUSTOM_FAMILY` must also be set of `bungeecord` (default), `velocity`, or `waterfall`. 
+  The type of the server.
+*
+* When the type is set to `CUSTOM`, the environment setting `BUNGEE_JAR_URL` is required. `CUSTOM_FAMILY` must also be set of `bungeecord` (default), `velocity`, or `waterfall`.
 
-  Possible values: 
+  Possible values:
   - [`BUNGEECORD`](https://www.spigotmc.org/wiki/bungeecord/)
   - [`WATERFALL`](https://github.com/PaperMC/Waterfall)
   - [`VELOCITY`](https://velocitypowered.com/)
   - `CUSTOM`
-
-* **MEMORY**=512m
-
-  The Java memory heap size to specify to the JVM. Setting this to an empty string will let the JVM calculate the heap size from the container declared memory limit. Be sure to consider adding `-XX:MaxRAMPercentage=<n>` (with `<n>` replaced) to `JVM_XX_OPTS`, where the JVM default is 25%.
 
 * **ICON**
 
@@ -80,6 +76,10 @@ healthy
 * **OVERRIDE_ICON**
 
   Will override any pre-existing server-icon.png file in the /server directory if `ICON` is set.
+
+* **MEMORY**=512m
+
+  The Java memory heap size to specify to the JVM. Setting this to an empty string will let the JVM calculate the heap size from the container declared memory limit. Be sure to consider adding `-XX:MaxRAMPercentage=<n>` (with `<n>` replaced) to `JVM_XX_OPTS`, where the JVM default is 25%.
 
 * **INIT_MEMORY**=${MEMORY}
 
@@ -97,9 +97,25 @@ healthy
 
   Number of seconds to cache the successful network address lookups. A lower value is helpful when Minecraft server containers are restarted and/or rescheduled and re-assigned a new container IP address.
 
+* **PUID**=1000
+
+  The user ID to run the proxy process as. When the container runs as root, the `bungeecord` user will be remapped to this UID via `usermod` before dropping privileges with `runuser`. Set to `0` to keep running as root.
+
+* **PGID**=1000
+
+  The group ID to run the proxy process as. When the container runs as root, the `bungeecord` group will be remapped to this GID via `groupmod` before dropping privileges with `runuser`. Set to `0` to keep running as the root group.
+
+* **SKIP_CHOWN_DATA**=false
+
+  When `true`, skips the `chown` of `$BUNGEE_HOME` (default: `/server`) to `PUID:PGID` on startup. Useful when ownership is already correct and you want to avoid the overhead, or when the volume is read-only at the root level.
+
+* **SKIP_PRIVILEGE_DROP**=false
+
+  When `true`, skips the entire privilege-dropping logic and runs the proxy directly as the current user without invoking `runuser`.
+
 * **PLUGINS**
 
-  Used to download a comma seperated list of *.jar urls to the plugins folder.
+  Used to download a comma separated list of *.jar urls to the plugins folder.
 
   ```
   -e PLUGINS=https://www.example.com/plugin1.jar,https://www.example.com/plugin2.jar
@@ -125,9 +141,9 @@ healthy
 * **SPIGET_PLUGINS**
 
   The `SPIGET_PLUGINS` variable can be set with a comma-separated list of SpigotMC resource IDs to automatically download [SpigotMC plugins](https://www.spigotmc.org/resources/) using [the spiget API](https://spiget.org/). Resources that are zip files will be expanded into the plugins directory and resources that are simply jar files will be moved there.
-  
+
   > NOTE: the variable is purposely spelled SPIG**E**T with an "E"
-  
+
   The **resource ID** can be located from the numerical part of the URL after the shortname and a dot. For example, the ID is **313** from
 
   ```
@@ -162,7 +178,7 @@ healthy
 
   Dependency resolution can be adjusted by setting `MODRINTH_DOWNLOAD_DEPENDENCIES` to `none`, `optional`, or `required` (the default).
 
-  **NOTE** The variable `MINECRAFT_VERSION` must be set to the corresponding Minecraft version. 
+  **NOTE** The variable `MINECRAFT_VERSION` must be set to the corresponding Minecraft version.
 
 * **ENABLE_RCON**
 
@@ -202,13 +218,13 @@ healthy
   If set, can specify a custom, fully qualified URL  of the BungeeCord.jar; however, you won't be able reference the other environment variables from within a `docker run` a compose file. Defaults to:
 
   * (type: `BUNGEECORD`): `${BUNGEE_BASE_URL}/${BUNGEE_JOB_ID}/artifact/bootstrap/target/BungeeCord.jar`
-  
+
   This takes precedence over `BUNGEE_JAR_FILE`.
 
 * **BUNGEE_JAR_FILE**
 
   For `TYPE=CUSTOM`, allows setting a custom BungeeCord JAR that is located inside the container.
-  
+
   Must be a valid path of an existing file.
 
 * **WATERFALL_VERSION**=latest
@@ -277,9 +293,11 @@ The following table shows the Java versions and CPU architectures supported by t
 
 | Tag    | Java | Architectures       |
 |--------|------|---------------------|
-| latest | 17   | amd64, arm64, armv7 |
-| java8  | 8    | amd64, arm64, armv7 |
+| latest | 21   | amd64, arm64        |
 | java25 | 25   | amd64, arm64        |
+| java21 | 21   | amd64, arm64        |
+| java17 | 17   | amd64, arm64, armv7 |
+| java8  | 8    | amd64, arm64, armv7 |
 
 ### Deprecated image tags
 
@@ -466,7 +484,7 @@ volume that is writable by that uid, such as:
 
 ## Java Versions
 
-The `latest` image tag is based on Java 21, but alternate image tags are available to run with a different java version. 
+The `latest` image tag is based on Java 21, but alternate image tags are available to run with a different java version.
 
 The image Java variant can be used as shown here:
 
@@ -479,6 +497,7 @@ or using release version, such as `2024.5.0`
 | Variant | Java Version | CPU types         |
 |---------|--------------|-------------------|
 | latest  | 21           | amd64,arm64       |
+| java25  | 25           | amd64,arm64       |
 | java21  | 21           | amd64,arm64       |
 | java17  | 17           | amd64,arm64,armv7 |
 | java11  | 11           | amd64,arm64,armv7 |
