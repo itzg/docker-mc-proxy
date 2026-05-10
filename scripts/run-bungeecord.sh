@@ -2,6 +2,10 @@
 
 : "${TYPE:=BUNGEECORD}"
 : "${DEBUG:=false}"
+: "${PUID:=1000}"
+: "${PGID:=1000}"
+: "${SKIP_CHOWN_DATA:=false}"
+: "${SKIP_PRIVILEGE_DROP:=false}"
 : "${RCON_JAR_VERSION:=1.0.0}"
 : "${RCON_VELOCITY_JAR_VERSION:=1.0.6}"
 : "${SPIGET_PLUGINS:=}"
@@ -308,7 +312,7 @@ function downloadDefaultConfigs() {
       log "$SECRET_FILE already exists"
     fi
   fi
-  
+
   # Download any extra configs specified by the user.  The format is
   # destination<url[,destination2<url2,...] and behaves similarly to
   # DOWNLOAD_DEFAULTS except that files are always copied relative to
@@ -532,10 +536,6 @@ fi
 
 processConfigs
 
-if [ $UID == 0 ]; then
-  chown -R bungeecord:bungeecord $BUNGEE_HOME
-fi
-
 if [[ ${INIT_MEMORY} || ${MAX_MEMORY} ]]; then
   log "Setting initial memory to ${INIT_MEMORY:=${MEMORY}} and max to ${MAX_MEMORY:=${MEMORY}}"
   if [[ ${INIT_MEMORY} ]]; then
@@ -562,8 +562,38 @@ if isTrue "${ENABLE_JMX}"; then
   log "JMX is enabled. Make sure you have port forwarding for ${JMX_PORT}"
 fi
 
-if [ $UID == 0 ]; then
-  exec sudo -E -u bungeecord "$JAVA_HOME/bin/java" $JVM_XX_OPTS $JVM_OPTS -jar "$BUNGEE_JAR" "$@"
+if ! isTrue "${SKIP_PRIVILEGE_DROP}" && [ "$(id -u)" = 0 ]; then
+  runAsUser=bungeecord
+  runAsGroup=bungeecord
+
+  if [[ $PUID != 0 ]]; then
+    if [[ $PUID != $(id -u bungeecord) ]]; then
+      log "Changing uid of bungeecord to $PUID"
+      usermod -u $PUID bungeecord
+    fi
+  else
+    runAsUser=root
+  fi
+
+  if [[ $PGID != 0 ]]; then
+    if [[ $PGID != $(id -g bungeecord) ]]; then
+      log "Changing gid of bungeecord to $PGID"
+      groupmod -o -g "$PGID" bungeecord
+    fi
+  else
+    runAsGroup=root
+  fi
+
+  if isFalse "${SKIP_CHOWN_DATA}" && [[ $(stat -c "%u" $BUNGEE_HOME) != "$PUID" ]]; then
+    log "Changing ownership of $BUNGEE_HOME to $PUID ..."
+    chown -R ${runAsUser}:${runAsGroup} $BUNGEE_HOME
+  fi
+
+  if [[ $runAsUser == root && $runAsGroup == root ]]; then
+    exec "$JAVA_HOME/bin/java" $JVM_XX_OPTS $JVM_OPTS -jar "$BUNGEE_JAR" "$@"
+  else
+    exec runuser -u ${runAsUser} -g ${runAsGroup} -- "$JAVA_HOME/bin/java" $JVM_XX_OPTS $JVM_OPTS -jar "$BUNGEE_JAR" "$@"
+  fi
 else
   exec "$JAVA_HOME/bin/java" $JVM_XX_OPTS $JVM_OPTS -jar "$BUNGEE_JAR" "$@"
 fi
