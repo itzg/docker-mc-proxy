@@ -6,6 +6,7 @@ WORKDIR /server
 
 RUN --mount=target=/build,source=build \
     /build/install-packages.sh
+COPY --from=tianon/gosu /gosu /usr/local/bin/
 
 RUN --mount=target=/build,source=build \
     /build/setup-user.sh
