@@ -39,7 +39,7 @@ jobs:
             tagPrefix: java8-
     env:
       DOCKER_HUB_ORG: itzg
-      MAIN_VARIANT: java21
+      MAIN_VARIANT: java25
     steps:
       - uses: actions/checkout@v7.0.0
 
