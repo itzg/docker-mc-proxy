@@ -3,7 +3,7 @@ name: Test Build
 on:
   pull_request:
     branches:
-      - master
+      - main
     paths-ignore:
       - "*.md"
 
@@ -13,12 +13,12 @@ jobs:
     strategy:
       matrix:
         variant:
-          - java21
+          - java25
         include:
-          - variant: java21
-            baseImage: eclipse-temurin:21-jre
+          - variant: java25
+            baseImage: eclipse-temurin:25-jre
             platforms: linux/amd64,linux/arm64
-            tagPrefix: java21-
+            tagPrefix: java25-
     steps:
       - uses: actions/checkout@v7.0.0
 
