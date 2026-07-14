@@ -490,12 +490,22 @@ if [[ "${family}" == "velocity" ]] || isTrue "${APPLY_VELOCITY_RCON:-false}"; th
   if isTrue "${ENABLE_RCON}"; then
     log "Downloading Velocity rcon plugin"
 
-    mkdir -p "$BUNGEE_HOME/plugins/velocircon"
-    if ! get -o "$BUNGEE_HOME/plugins" --skip-up-to-date --log-progress-each "$RCON_VELOCITY_JAR_URL"; then
-      echo "ERROR: failed to download from $RCON_VELOCITY_JAR_URL"
-      exit 1
+    # if .velocircon-manifest.json doesn't exist, then do a one time cleanup of older velocircon plugin files
+    if [ ! -f "$BUNGEE_HOME/plugins/.velocircon-manifest.json" ] && [ -d "$BUNGEE_HOME/plugins" ]; then
+      log "Removing old velocircon plugin files"
+      find "$BUNGEE_HOME/plugins" -maxdepth 1 -type f -name "Velocircon-*.jar" -delete
     fi
 
+    if ! mc-image-helper mcopy \
+      --scope "velocircon" \
+      --to "$BUNGEE_HOME/plugins" \
+      --skip-existing \
+      "$RCON_VELOCITY_JAR_URL"; then
+      echo "ERROR: failed to download from $RCON_VELOCITY_JAR_URL"
+      exit 2
+    fi
+
+    mkdir -p "$BUNGEE_HOME/plugins/velocircon"
     configFile="$BUNGEE_HOME/plugins/velocircon/rcon.yml"
     if [ ! -e "$configFile" ]; then
       log "Copy Velocity rcon configuration"
@@ -509,15 +519,24 @@ if [[ "${family}" == "velocity" ]] || isTrue "${APPLY_VELOCITY_RCON:-false}"; th
 
 # Download orblazer/bungee-rcon plugin
 elif [[ "${family}" == "bungeecord" ]] || isTrue "${APPLY_BUNGEECORD_RCON:-false}"; then
-  if isTrue "${ENABLE_RCON}" && [[ ! -e $BUNGEE_HOME/plugins/${RCON_JAR_URL##*/} ]]; then
+  if isTrue "${ENABLE_RCON}"; then
     log "Downloading Bungee rcon plugin"
-    mkdir -p $BUNGEE_HOME/plugins/bungee-rcon
+    # if .bungeecord-rcon-manifest.json doesn't exist, then do a one time cleanup of older bungee-rcon plugin files
+    if [ ! -f "$BUNGEE_HOME/plugins/.bungeecord-rcon-manifest.json" ] && [ -d "$BUNGEE_HOME/plugins" ]; then
+      log "Removing old bungee-rcon plugin files"
+      find "$BUNGEE_HOME/plugins" -maxdepth 1 -type f -name "bungee-rcon-*.jar" -delete
+    fi
 
-    if ! mc-image-helper get -o "$BUNGEE_HOME/plugins/${RCON_JAR_URL##*/}" "$RCON_JAR_URL"; then
-      echo "ERROR: failed to download from $RCON_JAR_URL to /tmp/${RCON_JAR_URL##*/}"
+    if ! mc-image-helper mcopy \
+      --scope "bungeecord-rcon" \
+      --to "$BUNGEE_HOME/plugins" \
+      --skip-existing \
+      "$RCON_JAR_URL"; then
+      echo "ERROR: failed to download from $RCON_JAR_URL"
       exit 2
     fi
 
+    mkdir -p $BUNGEE_HOME/plugins/bungee-rcon
     configFile="$BUNGEE_HOME/plugins/bungee-rcon/config.yml"
     if [ ! -e "$configFile" ]; then
        log "Copy Bungee rcon configuration"

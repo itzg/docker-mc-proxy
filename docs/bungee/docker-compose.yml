@@ -1,0 +1,25 @@
+services:
+  mc:
+    image: itzg/minecraft-server
+    environment:
+      EULA: "TRUE"
+      ONLINE_MODE: "FALSE"
+    volumes:
+      - mc-data:/data
+  proxy:
+    image: itzg/mc-proxy
+    environment:
+      TYPE: BUNGEECORD
+      ENABLE_RCON: true
+      DEBUG: true
+      CFG_MOTD: Powered by Docker
+      REPLACE_ENV_VARIABLES: "true"
+    ports:
+      - "25565:25577"
+    volumes:
+      - ./config.yml:/config/config.yml
+      - proxy-data:/server
+
+volumes:
+  mc-data:
+  proxy-data:
