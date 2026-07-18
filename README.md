@@ -178,7 +178,8 @@ healthy
 
   Dependency resolution can be adjusted by setting `MODRINTH_DOWNLOAD_DEPENDENCIES` to `none`, `optional`, or `required` (the default).
 
-  **NOTE** The variable `MINECRAFT_VERSION` must be set to the corresponding Minecraft version.
+> [!IMPORTANT]
+> The variable `MINECRAFT_VERSION` must be set to the corresponding Minecraft version, which would be the `VERSION` variable in a container running `itzg/minecraft-server`.
 
 * **ENABLE_RCON**
 
