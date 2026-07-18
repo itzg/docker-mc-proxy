@@ -38,7 +38,9 @@ jobs:
             platforms: linux/amd64,linux/arm/v7,linux/arm64
             tagPrefix: java8-
     env:
-      DOCKER_HUB_ORG: itzg
+      # Assume they line up, but when forked change to your Docker Hub username
+      DOCKER_HUB_ORG: ${{ github.repository_owner }}
+      PUSH: ${{ github.repository_owner == 'itzg' }}
       MAIN_VARIANT: java25
     steps:
       - uses: actions/checkout@v7.0.0
@@ -76,14 +78,14 @@ jobs:
         uses: docker/setup-qemu-action@v4.2.0
 
       - name: Login to DockerHub
-        if: github.event_name != 'pull_request'
+        if: env.PUSH && github.event_name != 'pull_request'
         uses: docker/login-action@v4.4.0
         with:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Login to GHCR
-        if: github.event_name != 'pull_request'
+        if: env.PUSH && github.event_name != 'pull_request'
         uses: docker/login-action@v4.4.0
         with:
           registry: ghcr.io
@@ -97,7 +99,7 @@ jobs:
           platforms: ${{ matrix.platforms }}
           # ensure latest base image is used
           pull: true
-          push: true
+          push: ${{ env.PUSH }}
           build-args: |
             BASE_IMAGE=${{ matrix.baseImage }}
           tags: ${{ steps.meta.outputs.tags }}
