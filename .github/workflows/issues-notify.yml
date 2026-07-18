@@ -13,6 +13,7 @@ on:
 
 jobs:
   notify:
+    if: secrets.DISCORD_ISSUES_WEBHOOK
     uses: itzg/github-workflows/.github/workflows/issues-notify-discord.yml@main
     secrets:
       discordWebhook: "${{secrets.DISCORD_ISSUES_WEBHOOK}}"
