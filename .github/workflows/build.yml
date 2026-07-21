@@ -43,7 +43,7 @@ jobs:
       PUSH: ${{ github.repository_owner == 'itzg' }}
       MAIN_VARIANT: java25
     steps:
-      - uses: actions/checkout@v7.0.0
+      - uses: actions/checkout@v7.0.1
 
       - name: Docker meta
         id: meta
