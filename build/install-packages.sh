@@ -12,6 +12,7 @@ DEBIAN_FRONTEND=noninteractive \
     tzdata \
     nano \
     unzip \
-    imagemagick
+    imagemagick \
+    jattach
 
 rm -rf /var/lib/apt/lists/*
