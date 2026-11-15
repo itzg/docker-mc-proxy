@@ -181,6 +181,19 @@ healthy
 > [!IMPORTANT]
 > The variable `MINECRAFT_VERSION` must be set to the corresponding Minecraft version, which would be the `VERSION` variable in a container running `itzg/minecraft-server`.
 
+* **HANGAR_PROJECTS**
+
+  Comma or newline separated list of [Hangar](https://hangar.papermc.io/) project slugs or IDs. The slug is the last part of the project page URL:
+  ```
+    https://hangar.papermc.io/kennytv/Maintenance
+                                      -----------
+                                       |
+                                       +-- project slug
+  ```
+  Also, a specific version can be declared using colon symbol and version name after the project slug. Velocity plugins are used for `VELOCITY` and Waterfall plugins, which are BungeeCord compatible, for `BUNGEECORD` and `WATERFALL`.
+
+  The channel of the newest version can be adjusted by setting `HANGAR_CHANNEL`, where the default is `Release`.
+
 * **ENABLE_RCON**
 
   Enable the rcon server (uses a third-party plugin to work).

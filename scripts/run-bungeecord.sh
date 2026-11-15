@@ -21,6 +21,8 @@
 : "${MODRINTH_PROJECTS:=}"
 : "${MODRINTH_DOWNLOAD_DEPENDENCIES:=required}"
 : "${MODRINTH_ALLOWED_VERSION_TYPE:=release}"
+: "${HANGAR_PROJECTS:=}"
+: "${HANGAR_CHANNEL:=Release}"
 : "${CUSTOM_FAMILY:=bungeecord}"
 : "${SKIP_DOWNLOAD_DEFAULTS:=false}"
 : "${DOWNLOAD_EXTRA_CONFIGS:=}"
@@ -483,6 +485,21 @@ if [[ $MODRINTH_PROJECTS ]]; then
     --loader="${family}" \
     --download-dependencies="${MODRINTH_DOWNLOAD_DEPENDENCIES}" \
     --allowed-version-type="${MODRINTH_ALLOWED_VERSION_TYPE}"
+fi
+
+if [[ $HANGAR_PROJECTS ]]; then
+  # Hangar hosts BungeeCord plugins under its Waterfall platform
+  if [[ "${family}" == "velocity" ]]; then
+    hangarPlatform=VELOCITY
+  else
+    hangarPlatform=WATERFALL
+  fi
+
+  mc-image-helper hangar \
+    --output-directory=/server \
+    --projects="${HANGAR_PROJECTS}" \
+    --platform="${hangarPlatform}" \
+    --channel="${HANGAR_CHANNEL}"
 fi
 
 # Download rcon plugin
